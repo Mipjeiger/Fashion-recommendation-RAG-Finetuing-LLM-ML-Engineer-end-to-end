@@ -19,6 +19,10 @@
 
 # 👨‍💻 Documentation logs
 
+- Inference fashion recommendation images
+
+    ![alt text](images/B73C8C74-FC0B-4172-87FF-6F027DA0B888.png)
+
 - Spark init dataset as storage RAM dataset
     
     ![alt text](<images/Screenshot 2026-02-10 at 20.26.11.png>)
@@ -31,7 +35,6 @@
     
     ![alt text](<images/Screenshot 2026-02-10 at 20.27.25.png>)
     
-- 
 - 
 
 ---
