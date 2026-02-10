@@ -17,7 +17,7 @@
 - printed_tshirts
 - solid_tshirts
 
-# 👨‍💻 Documentation logs
+# 👨‍💻 Documentation
 
 - Inference fashion recommendation images
 
@@ -35,6 +35,14 @@
     
     ![alt text](<images/Screenshot 2026-02-10 at 20.27.25.png>)
     
+- ML Engineer decision: Use tensorflow as deep learning model for deep research to solve business problem
+
+- AI Engineer decision: 
+    - Retrieval based on PDF relevant about fashion recommendation to Vector Database
+    - Integrating LLM-based attribute aware context with fine-grained fashion retrieval. For each attribute in the query the LLM first generates a detailed attribute-aware context for enriching attribute representations with commonsense business insight requirements.
+
+- Django framework to display UI Website integrated with kafka as data ingested
+
 - 
 
 ---
@@ -43,7 +51,7 @@
 
 - Data        : Spark + Parquet
 - Orchestration: Airflow
-- Training    : PyTorch
+- Training    : Tensorflow, Pytorch (Optional)
 - LLM         : Hugging Face + PEFT (LoRA)
 - Retrieval   : FAISS
 - Notebook:  Experiment
