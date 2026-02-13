@@ -43,7 +43,41 @@
 
 - Django framework to display UI Website integrated with kafka as data ingested
 
-- 
+- Create classifiying fashion recommendation based on engagement score which are affected by purchase_count, click_count, view_count. All affected features based on [’subcategory’,‘season’, ‘occasion’] insights
+
+- loss=’binary_crossentropy’ for effecting on classified deep learning similarity search
+
+- Training models to retrieve .keras models → Output:
+    - model = .keras result
+    - embed_model = .keras result
+
+- Build LLM Finetuning chatbot for business recomendation → business problem solving // RAG Faiss Documentation for embedding Vector Database
+    - Output → Fashion similarity recommendation outfit matching
+    - Convert PDF text into vectors
+    - Retrieve relevant chunks fast
+    - Avoid sending everything to the LLM
+
+- Based on experiment i have:
+    - ✅ PDF → chunking
+    - ✅ SentenceTransformer embeddings (384-dim)
+    - ✅ FAISS vector index
+    - ✅ LLM generation (RAG)
+    - ✅ Neural re-ranker (Keras)
+
+- Create MLOps platform to continue in production
+
+- HuggingFace results
+    
+    ![alt text](<images/hug 1.png>)
+    
+- LLM using models meta-llama/Llama-3.2-3B-Instruct based on if error use google/flan-t5-large results:
+    
+    ![alt text](<images/hug 2.png>)
+    
+- LLM using models mistralai/Mistral-7B-Instruct-v0.2 based on if error use openchat/openchat-3.5-0106 results:
+    
+    ![alt text](<images/hug 3.png>)
+-
 
 ---
 
