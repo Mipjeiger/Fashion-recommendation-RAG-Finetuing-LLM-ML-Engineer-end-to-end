@@ -2,3 +2,5 @@
 .vscode
 .github/workflows
 .DS_Store
+MLOps/.env
+.venv
