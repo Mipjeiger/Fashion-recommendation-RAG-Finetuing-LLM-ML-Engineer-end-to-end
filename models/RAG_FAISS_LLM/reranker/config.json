@@ -1,0 +1,6 @@
+{
+  "query_embedding_dim": 384,
+  "doc_embedding_dim": 384,
+  "numeric_features_dim": 5,
+  "total_features": 773
+}
