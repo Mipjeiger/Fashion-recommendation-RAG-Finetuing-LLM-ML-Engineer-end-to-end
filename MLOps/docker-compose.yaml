@@ -1,0 +1,165 @@
+version: '3.8'
+
+networks:
+  airflow-network:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:13-alpine
+    container_name: airflow-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    mem_limit: 512m
+    cpus: 0.5
+    command: postgres -c shared_buffers=128MB -c max_connections=100
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - airflow-network
+
+  spark:
+    image: apache/spark:3.5.1-java17
+    container_name: spark
+    environment:
+      SPARK_MASTER_HOST: spark
+      SPARK_MASTER_PORT: 7077
+      SPARK_DAEMON_MEMORY: 512m
+      SPARK_DRIVER_MEMORY: 512m
+      SPARK_EXECUTOR_MEMORY: 512m
+    volumes:
+      - ./:/opt/project
+    ports:
+      - "7077:7077"
+      - "8081:8080"
+    mem_limit: 2g
+    cpus: 0.75
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    restart: always
+    networks:
+      - airflow-network
+
+  airflow-init:
+    image: apache/airflow:3.1.7-python3.11
+    container_name: airflow-init
+    env_file: .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        airflow db migrate
+        airflow users create \
+          --username "$${AIRFLOW_ADMIN_USER}" \
+          --password "$${AIRFLOW_ADMIN_PASSWORD}" \
+          --firstname Air \
+          --lastname Flow \
+          --role Admin \
+          --email "$${AIRFLOW_ADMIN_EMAIL}" || echo "User already exists"
+    restart: "no"
+    networks:
+      - airflow-network
+
+  airflow-api-server:
+    image: apache/airflow:3.1.7-python3.11
+    container_name: airflow-webserver
+    env_file: .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    ports:
+      - "9091:9091"
+    mem_limit: 1g
+    cpus: 0.5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    command: api-server
+    restart: always
+    networks:
+      - airflow-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:9091/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow-ui:
+    image: apache/airflow:3.1.7-python3.12
+    container_name: airflow-ui
+    env_file: .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    ports:
+      - "8080:8080"  # UI port
+    mem_limit: 1g
+    cpus: 0.5
+    depends_on:
+      airflow-api-server:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    command: standalone-ui  # NEW command for UI
+    restart: always
+    networks:
+      - airflow-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow-scheduler:
+    image: apache/airflow:3.1.7-python3.11
+    container_name: airflow-scheduler
+    env_file: .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__CORE__PARALLELISM: 4
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: 2
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./:/opt/project
+    command: scheduler
+    mem_limit: 1g
+    cpus: 0.75
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    restart: always
+    networks:
+      - airflow-network
+
+volumes:
+  postgres-data:

@@ -120,7 +120,7 @@ Notes:  1. Don't be hallucinated about the fashion items.
                     {"role": "system", "content": "You are a specialized fashion recommendation assistant."},
                     {"role": "user", "content": prompt}
                 ],
-                model="mistralai/Mistral-7B-Instruct-v0.2",
+                model="meta-llama/Llama-3.2-3B-Instruct",
                 max_tokens=700,
                 temperature=0.7
             )
@@ -132,7 +132,7 @@ Notes:  1. Don't be hallucinated about the fashion items.
                 # Fallback to a simpler model if the first one fails
                 response = llm_client.text_generation(
                     prompt=prompt,
-                    model="openchat/openchat-3.5-0106",
+                    model="google/flan-t5-large",
                     max_new_tokens=700,
                     temperature=0.7
                 )
