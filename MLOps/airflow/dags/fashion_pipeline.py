@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from datetime import datetime
 
 with DAG(
@@ -9,19 +9,18 @@ with DAG(
     catchup=False
 ) as dag:
     
-    spark_etl = BashOperator(
-    task_id="spark_batch_etl",
-    bash_command="spark-submit /opt/project/spark/batch_etl.py"
-    )
+    spark_conf = {
+        "spark.executor.memory": "512m",
+        "spark.driver.memory": "512m",
+        "spark.sql.shuffle.partitions": "4"
+    }
 
-    spark_features = BashOperator(
-    task_id="spark_features_rep",
-    bash_command="spark-submit /opt/project/spark/feature_rep.py"
+    spark_etl = SparkSubmitOperator(
+        task_id="spark_batch_etl",
+        application="/opt/project/spark/batch_etl.py",
+        name="fashion-batch-etl",
+        conn_id="spark_default",
+        conf=spark_conf,
+        verbose=True
+        
     )
-
-    train = BashOperator(
-    task_id="pytorch_training",
-    bash_command="python /opt/project/training/train.py"
-    )
-
-    spark_etl >> spark_features >> train

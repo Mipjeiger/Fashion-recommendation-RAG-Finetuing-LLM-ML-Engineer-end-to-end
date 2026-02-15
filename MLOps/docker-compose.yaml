@@ -52,114 +52,57 @@ services:
     networks:
       - airflow-network
 
-  airflow-init:
-    image: apache/airflow:3.1.7-python3.11
-    container_name: airflow-init
-    env_file: .env
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    entrypoint: ["/bin/bash", "-c"]
-    command:
-      - |
-        airflow db migrate
-        airflow users create \
-          --username "$${AIRFLOW_ADMIN_USER}" \
-          --password "$${AIRFLOW_ADMIN_PASSWORD}" \
-          --firstname Air \
-          --lastname Flow \
-          --role Admin \
-          --email "$${AIRFLOW_ADMIN_EMAIL}" || echo "User already exists"
-    restart: "no"
-    networks:
-      - airflow-network
-
-  airflow-api-server:
-    image: apache/airflow:3.1.7-python3.11
-    container_name: airflow-webserver
-    env_file: .env
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-    volumes:
-      - ./airflow/dags:/opt/airflow/dags
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.11.3
+    container_name: mlflow
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow.db
+      --default-artifact-root /mlflow/artifacts
+      --host 0.0.0.0
+      --port 5000
     ports:
-      - "9091:9091"
-    mem_limit: 1g
+      - "5020:5000"
+    volumes:
+      - mlflow-artifacts:/mlflow/artifacts
+      - mlflow-db:/mlflow
+    mem_limit: 384m
     cpus: 0.5
-    depends_on:
-      postgres:
-        condition: service_healthy
-      airflow-init:
-        condition: service_completed_successfully
-    command: api-server
     restart: always
     networks:
       - airflow-network
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:9091/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  airflow-ui:
-    image: apache/airflow:3.1.7-python3.12
-    container_name: airflow-ui
-    env_file: .env
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+  prometheus:
+    image: prom/prometheus:v2.50.0
+    container_name: prometheus
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "8080:8080"  # UI port
-    mem_limit: 1g
-    cpus: 0.5
-    depends_on:
-      airflow-api-server:
-        condition: service_healthy
-      airflow-init:
-        condition: service_completed_successfully
-    command: standalone-ui  # NEW command for UI
+      - "9090:9090"
+    mem_limit: 256m
+    cpus: 0.25
     restart: always
     networks:
       - airflow-network
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  airflow-scheduler:
-    image: apache/airflow:3.1.7-python3.11
-    container_name: airflow-scheduler
-    env_file: .env
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
     environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
-      AIRFLOW__CORE__PARALLELISM: 4
-      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: 2
-    volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./:/opt/project
-    command: scheduler
-    mem_limit: 1g
-    cpus: 0.75
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: ${GF_USERS_ALLOW_SIGN_UP}
+    mem_limit: 256m
+    cpus: 0.25
     depends_on:
-      postgres:
-        condition: service_healthy
-      airflow-init:
-        condition: service_completed_successfully
+      - prometheus
     restart: always
     networks:
       - airflow-network
 
 volumes:
   postgres-data:
+  mlflow-artifacts:
+  mlflow-db:

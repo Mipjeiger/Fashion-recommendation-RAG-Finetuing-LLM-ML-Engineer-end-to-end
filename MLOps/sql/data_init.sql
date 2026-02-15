@@ -1,3 +1,19 @@
+-- Active: 1770487880142@@127.0.0.1@5432
+-- Active: 1770487880142@@127.0.0.1@5432.0.0.1@5432.0.0.1@5432.0.0.1@5432.0.0.1@5432
+-- Create data_registry table
+CREATE TABLE IF NOT EXISTS data_registry (
+    item_id SERIAL PRIMARY KEY,
+    dataset_name TEXT,
+    dataset_version TEXT,
+    path TEXT,
+    row_count BIGINT,
+    schema_hash TEXT,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+-- Validate the table creation
+SELECT * FROM data_registry;
+
 CREATE TABLE IF NOT EXISTS market_sentiment (
     item_id SERIAL PRIMARY KEY,
     view_count INT NOT NULL,
