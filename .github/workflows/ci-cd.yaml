@@ -1,0 +1,112 @@
+name: MLOps CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/mlops
+
+jobs:
+
+  # =========================
+  # 1. LINT & TEST
+  # =========================
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install deps
+        run: |
+          pip install black flake8 pytest
+
+      - name: Lint
+        run: |
+          black --check .
+          flake8 .
+
+  # =========================
+  # 2. BUILD & PUSH IMAGES
+  # =========================
+  build-images:
+    needs: lint-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push FastAPI
+        run: |
+          docker build -t $IMAGE_PREFIX-fastapi:latest serving/
+          docker push $IMAGE_PREFIX-fastapi:latest
+
+      - name: Build & Push Django
+        run: |
+          docker build -t $IMAGE_PREFIX-django:latest api/
+          docker push $IMAGE_PREFIX-django:latest
+
+      - name: Build & Push Airflow
+        run: |
+          docker build -t $IMAGE_PREFIX-airflow:latest airflow/
+          docker push $IMAGE_PREFIX-airflow:latest
+
+  # =========================
+  # 3. DEPLOY TO KUBERNETES
+  # =========================
+  deploy:
+    needs: build-images
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Set kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f kubernetes/namespace.yaml
+          kubectl apply -f kubernetes/
+
+  # =========================
+  # 4. SLACK NOTIFICATION
+  # =========================
+  notify:
+    if: always()
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "🚀 MLOps CI/CD pipeline finished for *${{ github.repository }}* on branch *${{ github.ref_name }}*"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

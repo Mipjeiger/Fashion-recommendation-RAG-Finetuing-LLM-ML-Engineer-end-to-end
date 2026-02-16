@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+  namespace: mlops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      containers:
+      - name: mlflow
+        image: ghcr.io/mlflow/mlflow:v2.10.2
+        args: ["mlflow","server", "--backend-store-uri", "sqlite:///mlflow.db", "/mlflow/artifacts","--host","0.0.0.0", "--port", "5000"]
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow
+  namespace: mlops
+spec:
+  selector:
+    app: mlflow
+  ports:
+  - port: 5020
