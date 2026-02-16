@@ -4,3 +4,5 @@
 .DS_Store
 MLOps/.env
 .venv
+MLOps/airflow/airflow.cfg
+MLOps/airflow/airflow.db

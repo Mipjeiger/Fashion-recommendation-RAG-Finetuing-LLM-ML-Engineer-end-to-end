@@ -1,3 +1,8 @@
+## 🛍️ Fashion Recommendation end-to-end enterprise project
+
+## ⚙️ Diagram workflow project
+![alt text](images/CF1C64DC-3365-4CBF-B0DF-9A4DA730C7F6.png)
+
 ## 🎯 Goals Project:
 
 - RAG LLM Finetuning fashion recommendation for giving insights business to user
