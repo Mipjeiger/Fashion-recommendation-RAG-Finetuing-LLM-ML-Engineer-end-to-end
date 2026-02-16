@@ -1,7 +1,7 @@
 ## 🛍️ Fashion Recommendation end-to-end enterprise project
 
 ## ⚙️ Diagram workflow project
-![alt text](images/B993436F-6934-4CBE-9B42-5C6C6B6BB5C0.png)
+![alt text](images/D454D340-7F97-4CDC-9C79-FEFE160E154A.png)
 
 ## 🎯 Goals Project:
 
