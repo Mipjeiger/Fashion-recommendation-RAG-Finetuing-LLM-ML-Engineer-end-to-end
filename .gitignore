@@ -6,3 +6,6 @@ MLOps/.env
 .venv
 MLOps/airflow/airflow.cfg
 MLOps/airflow/airflow.db
+MLOps/airflow/simple_auth_manager_passwords.json.generated
+MLOps/airflow/dags/__pycache__/
+MLOps/airflow/logs
