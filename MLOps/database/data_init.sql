@@ -1,5 +1,7 @@
--- Active: 1770487880142@@127.0.0.1@5432
+-- Active: 1771162575354@@localhost@5432@airflow
 -- Active: 1770487880142@@127.0.0.1@5432.0.0.1@5432.0.0.1@5432.0.0.1@5432.0.0.1@5432
+
+-- AIRFLOW + SPARK ENVIRONMENT
 -- Create data_registry table
 CREATE TABLE IF NOT EXISTS data_registry (
     item_id SERIAL PRIMARY KEY,
@@ -14,6 +16,18 @@ CREATE TABLE IF NOT EXISTS data_registry (
 -- Validate the table creation
 SELECT * FROM data_registry;
 
+-- Create pipeline_runs table
+CREATE TABLE IF NOT EXISTS pipeline_runs (
+    run_id TEXT PRIMARY KEY,
+    dag_id TEXT,
+    status TEXT,
+    started_at TIMESTAMP,
+    finished_at TIMESTAMP
+);
+-- validate the table creation
+SELECT * FROM pipeline_runs;
+
+-- POSTGRESQL ENVIRONMENT
 CREATE TABLE IF NOT EXISTS market_sentiment (
     item_id SERIAL PRIMARY KEY,
     view_count INT NOT NULL,

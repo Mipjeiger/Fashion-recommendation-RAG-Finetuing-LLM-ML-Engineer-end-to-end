@@ -1,7 +1,8 @@
 import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
-from pyspark.sql.types import *
+from pyspark.sql.types import StructType, StructField, StringType, LongType
+from pyspark.sql.functions import from_json, col
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -11,12 +12,17 @@ ENV_PATH = BASE_DIR / ".env"
 # Load environment variables from .env file
 load_dotenv(ENV_PATH)
 
-# Create Spark session
+# ---------------------------------------------------
+# SPARK SESSION
+# ---------------------------------------------------
 spark = SparkSession.builder \
     .appName("streaming") \
     .getOrCreate()
 
-# Define schema for incoming data
+
+# ---------------------------------------------------
+# SCHEMA FOR INCOMING STREAMING DATA
+# ---------------------------------------------------
 schema = StructType([
     StructField("user_id", StringType()),
     StructField("item_id", StringType()),
@@ -24,21 +30,39 @@ schema = StructType([
     StructField("timestamp", LongType())
 ])
 
-# Create streaming Dataframe from a socket source
-df = (
+# ---------------------------------------------------
+# READ STREAMING DATA FROM KAFKA
+# ---------------------------------------------------
+raw_stream = (
     spark.readStream
     .format("kafka")
     .option("kafka.bootstrap.servers", "kafka:9092")
     .option("subscribe", "fashion.user.events")
+    .option("startingOffsets", "latest")
     .load()
 )
 
-events = df.select(from_json(col("value").cast("string"), schema=schema).alias("e").select("e.*"))
+events = (
+    raw_stream
+    .selectExpr("CAST(value AS STRING)")
+    .select(from_json(col("value"), schema=schema).alias("e"))
+    .select("e.*")
+)
+
+# -------------------------------------------------------------------
+# SINK (PARQUET + CHECKPOINT)
+# -------------------------------------------------------------------
+output_path = BASE_DIR / "data" / "streaming" / "events"
+checkpoint_path = BASE_DIR / "data" / "checkpoints" / "fashion_events"
 
 # Write streaming Dataframe to console
-events.writeStream \
-    .format("parquet") \
-    .option("path", os.path.join(BASE_DIR, "data", "streaming", "events")) \
-    .option("checkpointLocation", os.path.join(BASE_DIR, "data", "checkpoints")) \
-    .start() \
-    .awaitTermination()
+query = (
+    events.writeStream
+    .format("parquet")
+    .outputMode("append")
+    .option("path", str(output_path))
+    .option("checkpointLocation", str(checkpoint_path))
+    .start()
+)
+
+query.awaitTermination()
