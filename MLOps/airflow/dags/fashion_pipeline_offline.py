@@ -1,34 +1,42 @@
 from airflow import DAG
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-from airflow.decorators import task
+from airflow.sdk import task
 from datetime import datetime
 import os
 import psycopg2
 
 """Database connection for fashion pipeline Offline - Airflow DAG.
-This DAG orchestrates the batch ETL and feature preparation steps using Spark, 
+This DAG orchestrates the batch ETL and feature preparation steps using Spark,
 and then stores the features in the data use PostgreSQL for offline training."""
 
 # CONFIGURATION
 POSTGRES_URI = os.getenv("POSTGRES_URI")
 
-CURATED_PATH = "/data/lakehouse/fashion/curated/items"
-FEATURE_PATH = "/data/lakehouse/fashion/features/offline"
-INPUT_PATH = "/data/raw/matched_fashion_dataset.parquet"
+# Create BASE_DIR and CURATED_PATH
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # MLOps/airflow/dags
+PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR)) # MLOps/
+
+
+SPARK_DIR = os.path.join(PROJECT_ROOT, "spark")
+INPUT_PATH = os.path.join(PROJECT_ROOT, "data", "raw", "matched_fashion_dataset.parquet")
+CURATED_PATH = os.path.join(PROJECT_ROOT, "data", "lakehouse", "fashion", "curated", "items")
+FEATURE_PATH = os.path.join(PROJECT_ROOT, "data", "lakehouse", "fashion", "features", "offline")
 
 with DAG(
-    dag_id="fashion_pipeline",
+    dag_id="fashion_pipeline_offline",
     start_date=datetime(2026, 1, 1),
     schedule=None,
     catchup=False,
-    tags=["fashion", "mlops"],
+    tags=["fashion", "mlops", "offline"],
 ) as dag:
 
     @task
-    def mark_start(run_id=None, dag_id=None):
-        print(f"Starting pipeline: dag_id={dag_id}, run_id={run_id}")
+    def mark_start(**context):
+        run_id = context.get("run_id")
+        dag_id = context.get("dag").dag_id
+        print(f"Starting offline pipeline: dag_id={dag_id}, run_id={run_id}")
         if not POSTGRES_URI:
-            print(f"[WARNING] POSTGRES_URI not set, skipping DB write")
+            print("[WARNING] POSTGRES_URI not set, skipping DB write")
             return
         with psycopg2.connect(POSTGRES_URI) as conn:
             with conn.cursor() as cur:
@@ -39,14 +47,11 @@ with DAG(
                 """, (run_id, dag_id))
 
     @task
-    def validate_path(path: str):
-        if not os.path.exists(path):
-            raise RuntimeError(f"Missing output path: {path}")
-
-    @task
-    def mark_success(run_id=None):
+    def mark_success(**context):
+        run_id = context.get("run_id")
+        print(f"Marking offline pipeline as SUCCESS: run_id={run_id}")
         if not POSTGRES_URI:
-            print(f"[WARNING] POSTGRES_URI not set, skipping DB write")
+            print("[WARNING] POSTGRES_URI not set, skipping DB write")
             return
         with psycopg2.connect(POSTGRES_URI) as conn:
             with conn.cursor() as cur:
@@ -58,11 +63,16 @@ with DAG(
 
     spark_batch_etl = SparkSubmitOperator(
         task_id="spark_batch_etl",
-        application="/opt/project/spark/batch_etl.py",
+        application=os.path.join(SPARK_DIR, "batch_etl.py"),
         conn_id="spark_default",
+        name="fashion-offline-batch-etl",
+        verbose=True,
+        conf={
+            "spark.master": "spark://localhost:7077"
+        },
         env_vars={
             "RUN_ID": "{{ run_id }}",
-            "PROCESS_DATE": "{{ ds }}",
+            "PROCESS_DATE": datetime.now().strftime("%Y-%m-%d"),
             "INPUT_PATH": INPUT_PATH,
             "OUTPUT_PATH": CURATED_PATH,
         },
@@ -70,21 +80,19 @@ with DAG(
 
     spark_feature_prep = SparkSubmitOperator(
         task_id="spark_feature_prep",
-        application="/opt/project/spark/feature_prep.py",
+        application=os.path.join(SPARK_DIR, "feature_prep.py"),
         conn_id="spark_default",
+        name="fashion-offline-feature-prep",
+        verbose=True,
+        conf={
+            "spark.master": "spark://localhost:7077"
+        },
         env_vars={
             "RUN_ID": "{{ run_id }}",
-            "PROCESS_DATE": "{{ ds }}",
             "CURATED_PATH": CURATED_PATH,
+            "PROCESS_DATE": datetime.now().strftime("%Y-%m-%d"),
             "FEATURE_PATH": FEATURE_PATH,
         },
     )
 
-    (
-        mark_start("{{ run_id }}", "{{ dag.dag_id }}")
-        >> spark_batch_etl
-        >> validate_path(CURATED_PATH)
-        >> spark_feature_prep
-        >> validate_path(FEATURE_PATH)
-        >> mark_success("{{ run_id }}")
-    )
+    mark_start() >> spark_batch_etl >> spark_feature_prep >> mark_success()

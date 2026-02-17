@@ -5,12 +5,23 @@ from pyspark.sql.functions import lit
 from pathlib import Path
 
 # Create BASE_DIR and .env path
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent  # MLOps/
 ENV_PATH = BASE_DIR / ".env"
+
 # Load environment variables from .env file
 load_dotenv(ENV_PATH)
 
+# ----------------------------------------------------
+# CONTRACT (FAIL FAST)
+# ----------------------------------------------------
+REQUIRED_ENV = ["RUN_ID", "CURATED_PATH", "FEATURE_PATH"]
+missing = [e for e in REQUIRED_ENV if not os.getenv(e)]
+if missing:
+    raise RuntimeError(f"Missing required environment variables: {missing}")
+
 RUN_ID = os.getenv("RUN_ID")
+CURATED_PATH = os.getenv("CURATED_PATH")   # ← passed from Airflow DAG
+FEATURE_PATH = os.getenv("FEATURE_PATH")   # ← passed from Airflow DAG
 
 # -------------------------------------------------------------------
 # SPARK SESSION
@@ -22,16 +33,15 @@ spark = SparkSession.builder \
 # -------------------------------------------------------------------
 # INPUT / OUTPUT PATH
 # -------------------------------------------------------------------
-input_path = BASE_DIR / "data" / "processed" / f"fashion_items_run_id={RUN_ID}"
-output_path = BASE_DIR / "data" / "training"
+input_path = Path(CURATED_PATH)    # ← reads from where batch_etl.py wrote
+output_path = Path(FEATURE_PATH)   # ← writes to feature store path
 
 # -------------------------------------------------------------------
 # READ DATA
 # -------------------------------------------------------------------
 df = spark.read.parquet(str(input_path))
-
 if df.rdd.isEmpty():
-    raise ValueError("Input dataset is empty")
+    raise ValueError(f"Input dataset is empty at path: {input_path}")
 
 # -------------------------------------------------------------------
 # FEATURE ENGINEERING
@@ -51,6 +61,5 @@ feature_df = (
     .parquet(str(output_path))
 )
 
-# Close spark connection 
 spark.stop()
 print(f"[SUCCESS] Feature prep completed | run_id={RUN_ID}")
