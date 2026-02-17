@@ -1,4 +1,4 @@
--- Active: 1771162575354@@localhost@5432@airflow
+-- Active: 1771296061150@@127.0.0.1@5432@airflow
 -- Active: 1770487880142@@127.0.0.1@5432.0.0.1@5432.0.0.1@5432.0.0.1@5432.0.0.1@5432
 
 -- AIRFLOW + SPARK ENVIRONMENT
@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS data_registry (
 
 -- Validate the table creation
 SELECT * FROM data_registry;
+
+SELECT * FROM data_registry WHERE dataset_name = 'market_sentiment';
 
 -- Create pipeline_runs table
 CREATE TABLE IF NOT EXISTS pipeline_runs (
