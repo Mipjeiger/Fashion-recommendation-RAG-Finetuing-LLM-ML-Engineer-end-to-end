@@ -2,6 +2,8 @@ import os
 import hashlib
 import psycopg2
 from dotenv import load_dotenv
+
+load_dotenv()
 from pyspark.sql.functions import lit
 from pyspark.sql import SparkSession
 from pathlib import Path
