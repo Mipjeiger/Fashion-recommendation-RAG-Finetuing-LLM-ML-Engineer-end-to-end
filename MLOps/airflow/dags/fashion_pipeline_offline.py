@@ -25,7 +25,8 @@ with DAG(
 ) as dag:
 
     @task
-    def mark_start(run_id, dag_id):
+    def mark_start(run_id=None, dag_id=None):
+        print(f"Starting pipeline: dag_id={dag_id}, run_id={run_id}")
         with psycopg2.connect(POSTGRES_URI) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
@@ -40,7 +41,7 @@ with DAG(
             raise RuntimeError(f"Missing output path: {path}")
 
     @task
-    def mark_success(run_id):
+    def mark_success(run_id=None):
         with psycopg2.connect(POSTGRES_URI) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
