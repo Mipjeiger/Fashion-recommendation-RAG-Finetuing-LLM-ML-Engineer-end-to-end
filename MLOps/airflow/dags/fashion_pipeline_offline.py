@@ -27,6 +27,9 @@ with DAG(
     @task
     def mark_start(run_id=None, dag_id=None):
         print(f"Starting pipeline: dag_id={dag_id}, run_id={run_id}")
+        if not POSTGRES_URI:
+            print(f"[WARNING] POSTGRES_URI not set, skipping DB write")
+            return
         with psycopg2.connect(POSTGRES_URI) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
@@ -42,6 +45,9 @@ with DAG(
 
     @task
     def mark_success(run_id=None):
+        if not POSTGRES_URI:
+            print(f"[WARNING] POSTGRES_URI not set, skipping DB write")
+            return
         with psycopg2.connect(POSTGRES_URI) as conn:
             with conn.cursor() as cur:
                 cur.execute("""

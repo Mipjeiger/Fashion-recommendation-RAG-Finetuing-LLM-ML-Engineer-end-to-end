@@ -9,3 +9,5 @@ MLOps/airflow/simple_auth_manager_passwords.json.generated
 MLOps/airflow/dags/__pycache__/
 MLOps/airflow/logs
 .github/workflows/ci-cd.yaml
+MLOps/airflow/airflow.db-wal
+MLOps/airflow/airflow.db-shm
