@@ -68,7 +68,7 @@ services:
       - airflow-network
 
   spark:
-    image: apache/spark:4.1.1-java17
+    image: apache/spark:3.5.1-java17
     container_name: spark
     environment:
       SPARK_MASTER_HOST: spark
@@ -94,6 +94,22 @@ services:
     restart: always
     networks:
       - airflow-network
+
+  spark-worker:
+    image: apache/spark:3.5.1-java17
+    container_name: spark-worker
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark:7077
+      SPARK_WORKER_MEMORY: 1g
+      SPARK_WORKER_CORES: 2
+    depends_on:
+      - spark
+    mem_limit: 1.5g
+    cpus: 0.5
+    networks:
+      - airflow-network
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark:7077
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.11.3

@@ -42,9 +42,6 @@ with DAG(
         name="fashion-online-batch-etl",
         conn_id="spark_default",
         verbose=True,
-        conf={
-            "spark.master": "spark://localhost:7077"
-        },
         env_vars={
             "RUN_ID": "{{ run_id }}",
             "PROCESS_DATE": datetime.now().strftime("%Y-%m-%d"),
@@ -53,15 +50,12 @@ with DAG(
         },
     )
 
-    spark_feature_prep = SparkSubmitOperator(
+    spark_feature_prep = SparkSubmitOperator(       
         task_id="spark_feature_prep",
         application=os.path.join(SPARK_DIR, "feature_prep.py"),
         name="fashion-online-feature-prep",
         conn_id="spark_default",
         verbose=True,
-        conf={
-            "spark.master": "spark://localhost:7077"
-        },
         env_vars={
             "CURATED_PATH": CURATED_PATH
         },

@@ -3,10 +3,15 @@ import hashlib
 import psycopg2
 from dotenv import load_dotenv
 
-load_dotenv()
+
 from pyspark.sql.functions import lit
 from pyspark.sql import SparkSession
 from pathlib import Path
+
+# Load .env path
+BASE_DIR = Path(__file__).resolve().parents[2]
+ENV_PATH = BASE_DIR / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 
 # ----------------------------------------------------
 # CONTRACT (FAIL FAST)
