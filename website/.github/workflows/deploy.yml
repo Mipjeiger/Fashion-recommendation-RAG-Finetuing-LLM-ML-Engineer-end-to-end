@@ -1,0 +1,23 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            docker pull myorg/inference-api:latest
+            docker pull myorg/django-api:latest
+            docker pull myorg/streamlit-ui:latest
+            docker-compose up -d

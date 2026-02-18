@@ -1,0 +1,33 @@
+name: Build & Push Docker Images
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & push Django API
+        run: |
+          docker build -f docker/django.Dockerfile -t myorg/django-api:latest .
+          docker push myorg/django-api:latest
+
+      - name: Build & push FastAPI inference
+        run: |
+          docker build -f docker/fastapi.Dockerfile -t myorg/inference-api:latest .
+          docker push myorg/inference-api:latest
+
+      - name: Build & push Streamlit UI
+        run: |
+          docker build -f docker/streamlit.Dockerfile -t myorg/streamlit-ui:latest .
+          docker push myorg/streamlit-ui:latest
