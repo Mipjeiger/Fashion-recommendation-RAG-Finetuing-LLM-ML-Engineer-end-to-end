@@ -1,0 +1,104 @@
+# =====================
+# Python
+# =====================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+*.so
+
+# =====================
+# Virtual Environments
+# =====================
+.venv/
+venv/
+env/
+ENV/
+
+# =====================
+# Environment / Secrets
+# =====================
+.env
+.env.*
+*.env
+
+# =====================
+# Git
+# =====================
+.git/
+.gitignore
+.gitattributes
+
+# =====================
+# IDE / Editor
+# =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# =====================
+# OS Files
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# Notebooks / Research
+# =====================
+notebooks/
+.ipynb_checkpoints/
+
+# =====================
+# Data / Artifacts
+# =====================
+data/
+datasets/
+artifacts/
+mlruns/
+*.parquet
+*.csv
+*.tsv
+*.h5
+*.pkl
+*.joblib
+
+# =====================
+# Logs / Monitoring
+# =====================
+logs/
+*.log
+
+# =====================
+# Tests / Docs
+# =====================
+tests/
+docs/
+coverage/
+htmlcov/
+
+# =====================
+# Docker / CI
+# =====================
+docker-compose*.yml
+Dockerfile*
+.github/
+.gitlab-ci.yml
+
+# =====================
+# Build / Cache
+# =====================
+dist/
+build/
+.eggs/
+*.egg-info/
+.cache/
+pip-wheel-metadata/
+
+# =====================
+# Models (OPTIONAL)
+# =====================
+# Uncomment if models are mounted as volumes
+# models/
