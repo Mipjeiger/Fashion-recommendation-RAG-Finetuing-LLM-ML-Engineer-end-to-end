@@ -67,9 +67,6 @@ with DAG(
         conn_id="spark_default",
         name="fashion-offline-batch-etl",
         verbose=True,
-        conf={
-            "spark.master": "spark://localhost:7077"
-        },
         env_vars={
             "RUN_ID": "{{ run_id }}",
             "PROCESS_DATE": datetime.now().strftime("%Y-%m-%d"),
@@ -84,14 +81,11 @@ with DAG(
         conn_id="spark_default",
         name="fashion-offline-feature-prep",
         verbose=True,
-        conf={
-            "spark.master": "spark://localhost:7077"
-        },
         env_vars={
             "RUN_ID": "{{ run_id }}",
-            "CURATED_PATH": CURATED_PATH,
             "PROCESS_DATE": datetime.now().strftime("%Y-%m-%d"),
-            "FEATURE_PATH": FEATURE_PATH,
+            "INPUT_PATH": CURATED_PATH,
+            "OUTPUT_PATH": FEATURE_PATH,
         },
     )
 

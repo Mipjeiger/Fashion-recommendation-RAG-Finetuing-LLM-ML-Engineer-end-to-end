@@ -10,3 +10,4 @@ MLOps/airflow/dags/__pycache__/
 MLOps/airflow/logs
 MLOps/airflow/airflow.db-wal
 MLOps/airflow/airflow.db-shm
+MLOps/dump.rdb
