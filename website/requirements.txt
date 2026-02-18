@@ -1,0 +1,57 @@
+# =====================
+# Core
+# =====================
+python-dotenv
+pydantic
+requests
+
+# =====================
+# Django
+# =====================
+Django>=4.2
+djangorestframework
+gunicorn
+
+# =====================
+# FastAPI
+# =====================
+fastapi
+uvicorn[standard]
+
+# =====================
+# Streaming
+# =====================
+kafka-python
+
+# =====================
+# ML / DL
+# =====================
+tensorflow>=2.15
+torch>=2.1
+torchvision
+sentence-transformers
+faiss-cpu
+
+# =====================
+# Data
+# =====================
+numpy
+pandas
+pyarrow
+scikit-learn
+
+# =====================
+# MLOps
+# =====================
+mlflow
+boto3
+
+# =====================
+# Monitoring / Utils
+# =====================
+prometheus-client
+
+# =====================
+# UI
+# =====================
+streamlit
