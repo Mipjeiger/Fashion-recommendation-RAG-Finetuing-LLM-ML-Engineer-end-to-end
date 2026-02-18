@@ -1,0 +1,12 @@
+python-dotenv
+pydantic
+requests
+
+Django>=4.2
+djangorestframework
+gunicorn
+
+streamlit
+kafka-python
+prometheus-client
+
