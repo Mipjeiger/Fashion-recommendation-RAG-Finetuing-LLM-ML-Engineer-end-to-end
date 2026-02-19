@@ -9,4 +9,4 @@ gunicorn
 streamlit
 kafka-python
 prometheus-client
-
+psycopg2-binary

@@ -24,8 +24,7 @@ WORKDIR /app
 # Python deps (WEB ONLY)
 # ---------------------
 COPY requirements-web.txt .
-RUN pip install --upgrade pip \
- && pip install --no-cache-dir -r requirements-web.txt
+RUN pip install --no-cache-dir -r requirements-web.txt
 
 # ---------------------
 # App code
