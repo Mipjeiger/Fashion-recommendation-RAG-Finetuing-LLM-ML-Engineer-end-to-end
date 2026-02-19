@@ -1,51 +1,68 @@
 import os
 from pathlib import Path
 
+# =========================
 # BASE
-BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-DEBUG = os.getenv("DJANGO_DEBUG").lower() == "true"
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",")
+# =========================
+BASE_DIR = Path(__file__).resolve().parents[2]
 
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-secret-key")
+DEBUG = os.getenv("DJANGO_DEBUG", "false").lower() == "true"
+
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1"
+).split(",")
+
+# =========================
 # APPS
+# =========================
 INSTALLED_APPS = [
-    "django.contrib.contenttypes",
+    "django.contrib.admin",
     "django.contrib.auth",
+    "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
-    # API
-    "rest_framework"
+
+    "rest_framework",
 ]
 
-MIDDLWARE = [
+# =========================
+# MIDDLEWARE (FIXED)
+# =========================
+MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middlewarre.common.CommonMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
-ROOT_URLCONF = "django_app.urls"
+# =========================
+# URLS / WSGI
+# =========================
+ROOT_URLCONF = "api.django_app.urls"
+
+WSGI_APPLICATION = "api.django_app.wsgi.application"
 
 # =========================
-# DATABASE (Optional)
+# DATABASE
 # =========================
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST"),
-        "PORT": os.getenv("POSTGRES_PORT"),
+        "NAME": os.getenv("POSTGRES_DB", "postgres"),
+        "USER": os.getenv("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "postgres"),
+        "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
 
 # =========================
-# TEMPLATES (Not Used, API-only)
+# TEMPLATES (API-only)
 # =========================
 TEMPLATES = []
 
@@ -55,7 +72,7 @@ TEMPLATES = []
 STATIC_URL = "/static/"
 
 # =========================
-# DJANGO REST FRAMEWORK
+# DRF
 # =========================
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -67,21 +84,17 @@ REST_FRAMEWORK = {
 }
 
 # =========================
-# KAFKA CONFIG
+# KAFKA
 # =========================
-KAFKA_BOOTSTRAP_SERVERS = os.getenv(
-    "KAFKA_BOOTSTRAP_SERVERS"
-)
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
 
 # =========================
-# FASTAPI INFERENCE
+# FASTAPI
 # =========================
-FASTAPI_INFERENCE_URL = os.getenv(
-    "FASTAPI_INFERENCE_URL"
-)
+FASTAPI_INFERENCE_URL = os.getenv("FASTAPI_INFERENCE_URL")
 
 # =========================
-# LOGGING (Simple, Production-Friendly)
+# LOGGING
 # =========================
 LOGGING = {
     "version": 1,

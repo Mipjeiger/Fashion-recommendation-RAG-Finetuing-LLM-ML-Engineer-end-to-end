@@ -1,6 +1,6 @@
 from django.urls import path
-from api.django_app import views
+from .views import home
 
 urlpatterns = [
-    path("api/recommend/", view=views.recommend_view, name="recommend")
+    path("", home),
 ]
