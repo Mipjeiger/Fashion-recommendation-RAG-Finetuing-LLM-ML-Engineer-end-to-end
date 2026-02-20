@@ -17,17 +17,17 @@ export default function Layout({ children }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
-              <Link to="/" className="text-2xl font-bold">
-                IndoCloth Market
+              <Link to="/" className="flex items-center space-x-2 text-2xl font-bold">
+                <ShoppingBag className="w-6 h-6 text-primary" />
+                <span>IndoCloth Market</span>
               </Link>
               <div className="flex space-x-4">
                 <Link
                   to="/"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    location.pathname === '/'
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${location.pathname === '/'
                       ? 'bg-gray-100 dark:bg-gray-800'
                       : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center space-x-2">
                     <ShoppingBag className="w-4 h-4" />
@@ -36,11 +36,10 @@ export default function Layout({ children }: LayoutProps) {
                 </Link>
                 <Link
                   to="/admin"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    location.pathname === '/admin'
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${location.pathname === '/admin'
                       ? 'bg-gray-100 dark:bg-gray-800'
                       : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center space-x-2">
                     <BarChart3 className="w-4 h-4" />
