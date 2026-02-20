@@ -56,8 +56,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.staticfiles import StaticFiles
+
 # Include routers
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+import os
+
+# Mount static files for images
+static_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "fashion_images", "dataset_clean")
+app.mount("/images", StaticFiles(directory=static_path), name="images")
 
 
 @app.get("/health")

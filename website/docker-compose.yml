@@ -107,7 +107,7 @@ services:
       dockerfile: Dockerfile
     container_name: indocloth-frontend
     ports:
-      - "3000:80"
+      - "4020:80"
     depends_on:
       - backend
     environment:
