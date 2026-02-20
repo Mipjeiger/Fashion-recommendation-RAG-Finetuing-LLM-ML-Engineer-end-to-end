@@ -9,9 +9,20 @@ from core.logging import get_logger
 
 logger = get_logger("database")
 
-# Create async engine
+
+def _get_async_database_url(url: str) -> str:
+    """Ensure DATABASE_URL uses async driver (asyncpg) for PostgreSQL."""
+    if "postgresql+psycopg2://" in url:
+        return url.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    return url
+
+
+# Create async engine (requires postgresql+asyncpg:// in URL)
+database_url = _get_async_database_url(settings.DATABASE_URL)
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    database_url,
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
     echo=settings.DEBUG,

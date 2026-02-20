@@ -1,3 +1,4 @@
+-- Active: 1771596228182@@127.0.0.1@5432@airflow
 SELECT * FROM fashion;
 SELECT * FROM market_sentiment;
 
