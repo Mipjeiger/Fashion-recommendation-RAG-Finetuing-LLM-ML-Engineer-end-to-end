@@ -1,4 +1,5 @@
 .env
+website/.env
 .vscode
 .DS_Store
 MLOps/.env
@@ -11,3 +12,4 @@ MLOps/airflow/logs
 MLOps/airflow/airflow.db-wal
 MLOps/airflow/airflow.db-shm
 MLOps/dump.rdb
+website/app/frontend/node_modules
