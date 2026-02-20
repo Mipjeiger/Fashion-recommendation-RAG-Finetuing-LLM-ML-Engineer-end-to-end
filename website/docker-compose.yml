@@ -1,20 +1,123 @@
+version: '3.8'
+
 services:
-  streamlit:
-    build:
-      context: .
-      dockerfile: docker/streamlit.Dockerfile
-    ports:
-      - "8501:8501"
-    volumes:
-      - ./streaming:/app/streaming
-      - ./ui:/app/ui
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: indocloth-postgres
     environment:
-      - KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:9092
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-          cpus: '0.5'
-        reservations:
-          memory: 256m
-          cpus: '0.25'
+      POSTGRES_DB: indocloth
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - indocloth-network
+
+  # Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: indocloth-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - indocloth-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: indocloth-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - indocloth-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile
+    container_name: indocloth-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/indocloth
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      INFERENCE_SERVICE_URL: http://inference-service:8001/inference
+      MODEL_BASE_PATH: /app/models
+      DEBUG: "false"
+      ENVIRONMENT: production
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN:-}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../MLOps/models:/app/models:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - indocloth-network
+
+  # FastAPI Inference Service (existing)
+  inference-service:
+    build:
+      context: ../api/fastapi_app
+      dockerfile: ../../docker/fastapi.Dockerfile
+    container_name: indocloth-inference
+    environment:
+      MODEL_PATH: /app/models
+    ports:
+      - "8001:8001"
+    volumes:
+      - ../MLOps/models:/app/models:ro
+    networks:
+      - indocloth-network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile
+    container_name: indocloth-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+    networks:
+      - indocloth-network
+
+volumes:
+  postgres_data:
+
+networks:
+  indocloth-network:
+    driver: bridge
