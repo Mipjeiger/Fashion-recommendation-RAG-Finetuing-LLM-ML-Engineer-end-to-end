@@ -67,50 +67,6 @@ services:
     networks:
       - airflow-network
 
-  spark:
-    image: apache/spark:3.5.1-java17
-    container_name: spark
-    environment:
-      SPARK_MASTER_HOST: spark
-      SPARK_MASTER_PORT: 7077
-      SPARK_DAEMON_MEMORY: 512m
-      SPARK_DRIVER_MEMORY: 512m
-      SPARK_EXECUTOR_MEMORY: 512m
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      S3_ENDPOINT: http://minio:9000
-      S3_USE_HTTPS: "0"
-    volumes:
-      - ./:/opt/project
-    ports:
-      - "7077:7077"
-      - "8081:8080"
-    mem_limit: 2g
-    cpus: 0.75
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
-    restart: always
-    networks:
-      - airflow-network
-
-  spark-worker:
-    image: apache/spark:3.5.1-java17
-    container_name: spark-worker
-    environment:
-      SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark:7077
-      SPARK_WORKER_MEMORY: 1g
-      SPARK_WORKER_CORES: 2
-    depends_on:
-      - spark
-    mem_limit: 1.5g
-    cpus: 0.5
-    networks:
-      - airflow-network
-    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark:7077
-
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.11.3
     container_name: mlflow

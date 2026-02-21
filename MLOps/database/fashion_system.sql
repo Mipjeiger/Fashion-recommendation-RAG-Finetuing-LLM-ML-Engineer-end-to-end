@@ -12,3 +12,5 @@ CREATE TABLE fashion_system (
     purchase_count INT,
     stocks INT
 );
+
+SELECT * FROM fashion_system;
