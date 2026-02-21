@@ -145,7 +145,7 @@ Notes:  1. Don't be hallucinated about the fashion items.
 faiss_loader = FaissLoader()
 
 # Load PDF
-pdf_text = faiss_loader.load_pdf(os.path.join(BASE_DIR, "data", "pdf", "fashion recommendation LLM.pdf"))
+pdf_text = faiss_loader.load_pdf(os.path.join(BASE_DIR, "database", "data", "pdf", "fashion recommendation LLM.pdf"))
 print(f"PDF loaded successfully!")
 print(f"Total characters: {len(pdf_text)}")
 print(f"First 200 characters:\n{pdf_text[:200]}...\n")

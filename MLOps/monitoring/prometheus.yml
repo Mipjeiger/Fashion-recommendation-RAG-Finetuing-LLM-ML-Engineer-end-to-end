@@ -1,7 +1,9 @@
 global:
-  scrape_interval: 15s
+  scrape_interval: 5s
+
+# Grafana → connect to Prometheus at http://prometheus:9090
 
 scrape_configs:
-  - job_name: prometheus
+  - job_name: "serving"
     static_configs:
-      - targets: ["prometheus:9090"]
+      - targets: ["serving:8081"]
