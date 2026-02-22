@@ -1,5 +1,5 @@
 # MLOps/notifications/slack_API/training_notify.py
-from notifications.slack_service import slack
+from MLOps.notifications.slack_service import slack
 import os
 
 MODEL_NAME = os.getenv("MODEL_NAME", "fashion_recommendation_model")

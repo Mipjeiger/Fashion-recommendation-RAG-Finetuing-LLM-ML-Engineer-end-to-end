@@ -178,3 +178,59 @@ class SlackService:
             {"type": "divider"},
             *learning_blocks
         ])
+    # ─────────────────────────────────────────
+    # 6. TRAINING START
+    # ─────────────────────────────────────────
+    def notify_training_start(self, model_name: str, epochs: int):
+        self._post([
+            {
+                "type": "header",
+                "text": {"type": "plain_text", "text": f"{ICONS['start']} Training Started: {model_name}"}
+            },
+            {
+                "type": "section",
+                "fields": [
+                    {"type": "mrkdwn", "text": f"*Model Name:*\n{model_name}"},
+                    {"type": "mrkdwn", "text": f"*Epochs:*\n{epochs}"},
+                ]
+            },
+            {"type": "divider"}
+        ])
+    # ─────────────────────────────────────────
+    # 7. TRAINING SUCCESS
+    # ─────────────────────────────────────────
+    def notify_training_success(self, model_name: str, val_loss: float, val_mae: float):
+        self._post([
+            {
+                "type": "header",
+                "text": {"type": "plain_text", "text": f"{ICONS['success']} Training Succeeded: {model_name}"}
+            },
+            {
+                "type": "section",
+                "fields": [
+                    {"type": "mrkdwn", "text": f"*Model Name:*\n{model_name}"},
+                    {"type": "mrkdwn", "text": f"*Validation Loss:*\n{val_loss:.4f}"},
+                    {"type": "mrkdwn", "text": f"*Validation MAE:*\n{val_mae:.4f}"},
+                ]
+            },
+            {"type": "divider"}
+        ])
+
+    # ─────────────────────────────────────────
+    # 8. TRAINING FAILED
+    # ─────────────────────────────────────────
+    def notify_training_failed(self, model_name: str, error: str):
+        self._post([
+            {
+                "type": "header",
+                "text": {"type": "plain_text", "text": f"{ICONS['error']} Training Failed: {model_name}"}
+            },
+            {
+                "type": "section",
+                "fields": [
+                    {"type": "mrkdwn", "text": f"*Model Name:*\n{model_name}"},
+                    {"type": "mrkdwn", "text": f"*Error:*\n{error}"},
+                ]
+            },
+            {"type": "divider"}
+        ])

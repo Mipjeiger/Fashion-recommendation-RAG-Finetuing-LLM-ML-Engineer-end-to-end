@@ -81,7 +81,9 @@ services:
   # MLflow (Production-ready config)
   # ===============================
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.11.3
+    build:
+      context: ./mlflow
+      dockerfile: Dockerfile
     container_name: mlflow
     depends_on:
       postgres:
@@ -89,12 +91,12 @@ services:
       minio:
         condition: service_healthy
     environment:
-      AWS_ACCESS_KEY_ID: minio
-      AWS_SECRET_ACCESS_KEY: minio123
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       MLFLOW_S3_ENDPOINT_URL: http://minio:9000
     command: >
       mlflow server
-      --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}
       --default-artifact-root s3://mlflow-bucket/
       --host 0.0.0.0
       --port 5000
@@ -153,7 +155,7 @@ services:
 
     volumes:
       - ../MLOps/serving:/app
-      - ../MLOps/models:/models
+      - ../MLOps/models:/app/models
 
     command: >
       sh -c "
@@ -164,7 +166,7 @@ services:
       "
 
     environment:
-      MODEL_PATH: models/tensorflow_training/fashion_recommendation_model.keras
+      MODEL_PATH: /app/models/tensorflow_training/fashion_recommendation_model.keras
       PYTHONDONTWRITEBYTECODE: 1
       PYTHONUNBUFFERED: 1
 

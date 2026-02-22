@@ -1,23 +1,19 @@
 # MLOps/airflow/dags/train_pipeline.py
+import os
+import pandas as pd
+from pathlib import Path
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
 
 from MLOps.notifications.slack_API.revenue_notify  import notify_daily_revenue_from_df
 from MLOps.notifications.slack_API.revenue_notify  import notify_weekly_revenue_from_df
 from MLOps.notifications.slack_API.learning_notify import notify_weekly_learnings_from_df
 from notifications.slack_service                   import slack
 
-import pandas as pd
-from pathlib import Path
-import os
-
 DATABASE = Path(os.getenv("DATABASE_PATH", "/app/database/data/raw/matched_fashion_dataset.parquet"))
 
-# ─────────────────────────────────────────
-# Failure Callback
-# ─────────────────────────────────────────
 def on_failure(context):
     slack.notify_pipeline_failed(
         dag_id  = context["dag"].dag_id,
@@ -28,13 +24,11 @@ def on_failure(context):
 default_args = {
     "owner"              : "MLOps",
     "retries"            : 1,
-    "retry_delay"        : timedelta(minutes=2), # Delay time between retries
+    "retry_delay"        : timedelta(minutes=5),
     "on_failure_callback": on_failure,
 }
 
-# ─────────────────────────────────────────
-# Task Functions
-# ─────────────────────────────────────────
+# ── Task Functions ──────────────────────────────
 def run_daily_revenue():
     df = pd.read_parquet(DATABASE)
     notify_daily_revenue_from_df(df)
@@ -49,15 +43,13 @@ def run_weekly_learnings():
     week = f"Week {datetime.now().isocalendar()[1]}"
     notify_weekly_learnings_from_df(df, week=week)
 
-# ─────────────────────────────────────────
-# DAG
-# ─────────────────────────────────────────
+# ── DAG ────────────────────────────────────────
 with DAG(
     "fashion_training",
     default_args = default_args,
     start_date   = datetime(2026, 1, 1),
     catchup      = False,
-    schedule     = None,  # trigger manually or change to "@daily" / "@weekly" anytime
+    schedule     = None,
 ) as dag:
 
     train_task = BashOperator(
@@ -80,15 +72,5 @@ with DAG(
         python_callable = run_weekly_learnings,
     )
 
-    # ─────────────────────────────────────────
-    # Task Order
-    # ─────────────────────────────────────────
+    # ── Task Order ─────────────────────────────
     train_task >> daily_revenue_task >> weekly_revenue_task >> weekly_learnings_task
-
-
-"""
-
-**Task order explained:**
-
-train_model → notify_daily_revenue → notify_weekly_revenue → notify_weekly_learnings
-"""

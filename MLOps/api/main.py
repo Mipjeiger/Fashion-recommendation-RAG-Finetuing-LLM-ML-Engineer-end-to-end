@@ -1,4 +1,4 @@
-"""Create a FastAPI app and define the API endpoints for MLOps operations."""
+"""Create a FastAPI backend (calls serving, retrieval, DB)"""
 import logging
 import os
 from dotenv import load_dotenv
