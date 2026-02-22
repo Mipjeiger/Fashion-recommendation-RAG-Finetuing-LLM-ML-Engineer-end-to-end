@@ -14,3 +14,5 @@ MLOps/airflow/airflow.db-shm
 MLOps/dump.rdb
 website/app/frontend/node_modules
 MLOps/models/tensorflow_training/fashion_recommendation_model.onnx
+**/__pycache__/
+**.DS_Store

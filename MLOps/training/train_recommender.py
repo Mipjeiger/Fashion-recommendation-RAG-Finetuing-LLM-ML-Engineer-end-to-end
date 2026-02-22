@@ -1,12 +1,15 @@
-# MLOps/training/train_recommender.py
 import os
 import pickle
+import sys
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
 
 from MLOps.notifications.slack_API.training_notify import (
     notify_start,
@@ -17,14 +20,21 @@ from MLOps.notifications.slack_API.training_notify import (
 # ─────────────────────────────────────────
 # Paths from .env
 # ─────────────────────────────────────────
-BASE_DIR          = Path(os.getenv("BASE_DIR", "/app"))
+BASE_DIR = Path(os.getenv("BASE_DIR", PROJECT_ROOT / "MLOps"))
+
 MODEL_DIR         = BASE_DIR / "models" / "tensorflow_training"
 MODEL_RECOMMENDER = MODEL_DIR / "fashion_recommendation_model.keras"
 MODEL_PRODUCTION  = MODEL_DIR / "fashion_recommendation_model_prod.keras"
 IMAGE_METADATA    = MODEL_DIR / "image_metadata.pkl"
-DATABASE          = BASE_DIR / "database" / "data" / "raw" / "matched_fashion_dataset.parquet"
-EPOCHS            = int(os.getenv("TRAIN_EPOCHS", 10))
-BATCH_SIZE        = int(os.getenv("TRAIN_BATCH_SIZE", 32))
+
+DATABASE = BASE_DIR / "database" / "data" / "raw" / "matched_fashion_dataset.parquet"
+
+EPOCHS     = int(os.getenv("TRAIN_EPOCHS", 10))
+BATCH_SIZE = int(os.getenv("TRAIN_BATCH_SIZE", 32))
+
+# Safety check
+if not DATABASE.exists():
+    raise FileNotFoundError(f"Dataset not found at: {DATABASE}")
 
 # ─────────────────────────────────────────
 # Encoders

@@ -10,6 +10,10 @@ model = load_model()
 # Start Prometheus metrics server
 start_http_server(8001)
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}, 200
+
 @app.post("/predict")
 def inference(payload: dict):
     with MODEL_LATENCY.time():
