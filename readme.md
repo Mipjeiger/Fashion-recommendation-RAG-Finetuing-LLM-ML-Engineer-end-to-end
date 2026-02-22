@@ -135,9 +135,9 @@
     - Kafka database
     - Airflow database
     - Postgresql database
-- Maintenance slack notifications inference similar such as API JSON reliable
+- Create & Maintenance slack notifications inference features are integrated with framework added by notify_daily_revenue, notify_weekly_revenue, notify_weekly_learnings
     
-    Notifications slack
+    Notifications slack features:
     
 - Debugging ci/cd for production grade inference
     

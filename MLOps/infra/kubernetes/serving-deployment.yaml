@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fashion-serving
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fashion-serving
+  template:
+    metadata:
+      labels:
+        app: fashion-serving
+    spec:
+      containers:
+      - name: serving
+        image: fashion-serving:latest
+        ports:
+        - containerPort: 8000

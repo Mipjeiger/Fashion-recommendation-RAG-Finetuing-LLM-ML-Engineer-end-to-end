@@ -13,3 +13,4 @@ MLOps/airflow/airflow.db-wal
 MLOps/airflow/airflow.db-shm
 MLOps/dump.rdb
 website/app/frontend/node_modules
+MLOps/models/tensorflow_training/fashion_recommendation_model.onnx
