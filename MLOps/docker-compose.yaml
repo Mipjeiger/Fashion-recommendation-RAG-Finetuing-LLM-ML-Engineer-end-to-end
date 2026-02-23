@@ -56,7 +56,7 @@ services:
   # ===============================
   postgres:
     image: postgres:13-alpine
-    container_name: airflow-postgres
+    container_name: postgresql
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
