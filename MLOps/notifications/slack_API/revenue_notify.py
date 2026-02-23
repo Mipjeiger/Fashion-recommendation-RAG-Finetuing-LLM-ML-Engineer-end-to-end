@@ -32,7 +32,7 @@ def notify_daily_revenue_from_df(df: pd.DataFrame):
             .sort_values(by="revenue", ascending=False)
             .head(5)
             [["item_id", "subcategory", "brand", "revenue"]]
-            .to_dict(orient="records")
+            .to_dict(orient="records") 
         )
 
         slack.notify_weekly_revenue(

@@ -7,5 +7,7 @@ producer = KafkaProducer(
 )
 
 def send_event(data):
+    print("Sending event:", data)
     producer.send("fashion-events", value=data)
     producer.flush()  # Ensure the event is sent immediately
+    print("Event sent successfully")

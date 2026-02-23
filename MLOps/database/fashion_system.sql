@@ -14,3 +14,6 @@ CREATE TABLE fashion_system (
 );
 
 SELECT * FROM fashion_system;
+
+-- validate kafka into database postgres
+SELECT * FROM fashion_system WHERE item_id = 'TNC_000001';
