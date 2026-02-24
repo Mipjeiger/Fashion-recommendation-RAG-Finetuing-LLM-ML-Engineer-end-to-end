@@ -36,6 +36,7 @@ def seed_database():
         return
 
     creds = extract_credentials(database_url)
+    limit = 200000 # Limit to 200k items for testing
     
     print(f"Connecting to database {creds['dbname']} at {creds['host']}...")
     try:
@@ -57,10 +58,15 @@ def seed_database():
         inserts = 0
         
         print(f"Scanning images in {IMAGE_DIR}...")
+
         for category in sorted(os.listdir(IMAGE_DIR)):
+            if inserts >= limit: break # Stop if we've reached the limit
+
             cat_path = os.path.join(IMAGE_DIR, category)
             if os.path.isdir(cat_path):
                 for img in sorted(os.listdir(cat_path)):
+                    if inserts >= limit: break
+
                     if img.endswith('.jpg'):
                         item_id = f"item_{item_counter:04d}"
                         brand = random.choice(brands)
@@ -79,12 +85,18 @@ def seed_database():
                         
                         item_counter += 1
                         inserts += 1
+
+                        # Optimization: COmmit every 10,000 rows to reduce transaction overhead
+                        if inserts % 10000 == 0:
+                            conn.commit()
+                            print(f"Progress: {inserts}/{limit} items inserted...")
                         
         conn.commit()
         print(f"Successfully seeded {inserts} fashion items into the database!")
         
     except Exception as e:
         print(f"Database error occurred: {e}")
+        if 'conn' in locals(): conn.rollback() # Rollback on error
     finally:
         if 'cur' in locals():
             cur.close()
