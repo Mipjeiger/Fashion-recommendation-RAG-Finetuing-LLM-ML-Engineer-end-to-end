@@ -1,3 +1,14 @@
+DROP TABLE IF EXISTS loss_profit;
+
+-- Create loss & profit table
+CREATE TABLE IF NOT EXISTS loss_profit (
+    item_id TEXT PRIMARY KEY,
+    purchase_count INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    stocks INT NOT NULL
+);
+
+-- revenue database
 SELECT * FROM loss_profit;
 
 -- sort by price in descending order
@@ -13,3 +24,10 @@ SELECT item_id, purchase_count, price, stocks
 FROM loss_profit
 WHERE item_id = 'item_0090';
 
+SELECT * FROM fashion_system;
+
+
+
+
+-- Market sentiment database
+SELECT * FROM market_sentiment;
