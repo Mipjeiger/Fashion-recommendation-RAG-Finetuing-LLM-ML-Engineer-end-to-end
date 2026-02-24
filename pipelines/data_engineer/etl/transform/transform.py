@@ -36,9 +36,9 @@ def transform_data():
             print(df.head())  # Print first 5 rows for verification 
 
         # Transform: calculate profit and loss per item
-        df['total_revenue'] = df['price'] * df['purchase_count']
+        df['sales'] = df['price'] * df['purchase_count']
         df['stock_value'] = df['price'] * df['stocks']
-        df['profit_status'] = df['total_revenue'].apply(lambda x: 'profit' if x > 0 else 'loss')
+        df['profit_status'] = df['sales'].apply(lambda x: 'profit' if x > 0 else 'loss')
 
         print("\nTransformed Data:")
         print(df.head())
