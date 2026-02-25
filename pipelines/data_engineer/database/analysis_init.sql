@@ -31,3 +31,9 @@ SELECT * FROM fashion_system;
 
 -- Market sentiment database
 SELECT * FROM market_sentiment;
+
+
+-- website traffic database
+SELECT * FROM recommendation_logs;
+
+SELECT * FROM drift_events;
