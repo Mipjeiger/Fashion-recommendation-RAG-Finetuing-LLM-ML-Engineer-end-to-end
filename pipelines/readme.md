@@ -13,3 +13,5 @@
 - Expriment in notebook for buiding LLM system chatbot using (OpenAI or Huggingfacehub models)
 
 - Target profit_status as forecasting sales prediction using LSTM, Dense by tensorflow for solving business problem indeed
+
+- Creating LLM Models with embedding = HuggingFaceEmbeddings(model="sentence-transformers/all-MiniLM-L6-v2")
