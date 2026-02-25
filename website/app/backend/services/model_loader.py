@@ -7,6 +7,11 @@ from typing import Optional, Dict, Any
 from datetime import datetime
 import httpx
 
+import os
+import sys
+# Create base_dir and add to sys.path for imports from directory structure
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from config.settings import settings
 from core.logging import get_logger
 from core.exceptions import ModelLoadError, InferenceError
