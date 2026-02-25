@@ -15,3 +15,10 @@
 - Target profit_status as forecasting sales prediction using LSTM, Dense by tensorflow for solving business problem indeed
 
 - Creating LLM Models with embedding = HuggingFaceEmbeddings(model="sentence-transformers/all-MiniLM-L6-v2")
+
+- Using Qdrant clound for better performance for preventing memory local issues used
+
+- Prediction
+    - Predicting sales and profit_status to ensure LSTM model is relevant for prediction
+    - Build chatbot based on PDF document source for inspecting ecommerce business problem
+    - Deploy LSTM model as prediction features and FinetuningLLM as chatbot on frontend for adding features
