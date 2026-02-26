@@ -1,5 +1,6 @@
 import os
 import torch
+from tqdm import tqdm
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_qdrant import QdrantVectorStore
@@ -22,6 +23,15 @@ HF_TOKEN = os.getenv('HF_TOKEN')
 QDRANT_API_KEY = os.getenv('Qdrant_API_KEY')
 QDRANT_CLUSTER_ENDPOINT = os.getenv('Qdrant_Cluster_Endpoint')
 
+# Create question for RAG Chain
+EVAL_QUESTION = [
+    "What are the key factors affecting revenue growth?",
+    "How does customer will be increased when prices are reduced?",
+    "What are the main challenges in forecasting sales face on stock values?",
+    "what's business analyst strategy to increase sales and profit in e-commerce?",
+    "What's deep learning using LSTM impact to sales forecasting in e-commerce?"
+]
+
 # 1. Cloud Embeddings (Zero Local Memory)
 embeddings = HuggingFaceEndpointEmbeddings(
     model="sentence-transformers/all-MiniLM-L6-v2",
@@ -38,7 +48,33 @@ qdrant_client = QdrantClient(
 )
 print(f"Connected to Qdrant at {QDRANT_CLUSTER_ENDPOINT} successfully.")
 
-# 3. Cloud LLM (Hugging Face Inference Endpoint)
+# Create chunking from PDF and ingest to Qdrant vector store
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+loader = PyPDFLoader(file_path=PDF_FILE_PATH)
+documents = loader.load()
+
+# Define chunking
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=800,
+    chunk_overlap=150
+)
+chunks = text_splitter.split_documents(documents=documents)
+
+# 3. Create Vector Store
+def vector_store():
+    vectore_store = QdrantVectorStore.from_documents(
+        documents=chunks,
+        embedding=embeddings,
+        collection_name="ecommerce_rag",
+        url=QDRANT_CLUSTER_ENDPOINT,
+        api_key=QDRANT_API_KEY,
+        prefer_grpc=False
+    )
+    return vectore_store
+vector_store = vector_store()
+
+# 4. Cloud LLM (Hugging Face Inference Endpoint)
 # This sends the text to HF servers; no model is downloaded to your Machine
 llm = HuggingFaceEndpoint(
     repo_id="mistralai/Mistral-7B-Instruct-v0.3",
@@ -49,7 +85,7 @@ llm = HuggingFaceEndpoint(
 )
 print("LLM initialized successfully.")
 
-# 4. RAG Chain Construction
+# 5. RAG Chain Construction
 class RAGChain(RunnablePassthrough):
     def __init__(self, llm, vector_store, top_k=3):
         self.llm = llm
@@ -85,5 +121,22 @@ Notes:
         # Step 2: Format the prompt with the retrieved documents and the query
         prompt = self.prompt_template.format(query=query, context=retrieved_texts)
 
+        # Step 3: Generate the answer using LLM
+        answer = self.llm(prompt)
+        return answer
+    
+# 6. Usage
 
-# 5. Usage
+if __name__ == "__main__":
+    rag_chain = RAGChain(llm=llm, vector_store=vector_store, top_k=3)
+    # Query for loopping
+    rag_results = []
+    for i, q in enumerate(tqdm(EVAL_QUESTION, desc="Processing question:")):
+        docs = rag_chain.invoke(q)
+        answer = {
+            "question": q,
+            "answer": docs,
+            "retrieved_docs": (len(docs) if isinstance(docs, list) else 1),
+            "source_pages": [d.metadata.get("source", "N/A") for d in rag_chain.vector_store.similarity_search(q, k=rag_chain.top_k)]
+        }
+        rag_results.append(answer)
