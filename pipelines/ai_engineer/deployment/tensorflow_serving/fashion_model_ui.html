@@ -281,8 +281,7 @@
 <footer>fashion_model · version 1 · tf serving 2.x</footer>
 
 <script>
-  const BASE = 'http://localhost:8501';
-  const MODEL = 'fashion_model';
+  const PROXY = 'http://localhost:5015';
 
   // Generate dummy input: 1 x 30 x 4
   function defaultInput() {
@@ -301,7 +300,7 @@
     dot.className = 'status-dot';
     txt.textContent = 'Checking...';
     try {
-      const res = await fetch(`${BASE}/v1/models/${MODEL}`);
+      const res = await fetch(`${PROXY}/status`);
       const data = await res.json();
       const state = data?.model_version_status?.[0]?.state;
       if (state === 'AVAILABLE') {
@@ -313,7 +312,7 @@
       }
     } catch(e) {
       dot.className = 'status-dot error';
-      txt.textContent = 'Cannot reach localhost:8501 — is Docker running?';
+      txt.textContent = 'Cannot reach Flask proxy on localhost:5015 — is server.py running?';
     }
   }
 
@@ -336,7 +335,7 @@
     outputCard.style.display = 'none';
 
     try {
-      const res = await fetch(`${BASE}/v1/models/${MODEL}:predict`, {
+      const res = await fetch(`${PROXY}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -359,7 +358,7 @@
       }
     } catch(e) {
       outputCard.style.display = 'block';
-      rawText.textContent = `Error: ${e.message}\n\nMake sure Docker is running and CORS is not blocked.`;
+      rawText.textContent = `Error: ${e.message}\n\nMake sure Flask proxy (server.py) is running on port 5015.`;
     } finally {
       btn.disabled = false;
       btn.innerHTML = 'Run Prediction';

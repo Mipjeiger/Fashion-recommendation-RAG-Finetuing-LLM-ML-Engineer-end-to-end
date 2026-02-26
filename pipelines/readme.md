@@ -25,6 +25,11 @@
 
 - Deploy LSTM .keras model using Tensorflow Serving
 
+    Model is deployed to Tensorflow Serving by using docker pull on tensorlofw/serving
     ![alt text](../images/15ACCF7F-90AD-47F7-9567-A573A95B1C66.png)
+    Model is deployed in HTML displays with prediction
+    ![alt text](../images/6AA6AC43-D446-456D-85F3-8C3818E4961A.png)
+    ![alt text](../images/054B7F7C-BD47-4F51-AB89-73B6E7F219BC.png)
+
 
 - Deploy Finetuning LLM + RAG in HuggingFace and integrating backend API Wrapped by langchain & langserve based on integrating with RAG_Analysis_Report.pdf Docs
