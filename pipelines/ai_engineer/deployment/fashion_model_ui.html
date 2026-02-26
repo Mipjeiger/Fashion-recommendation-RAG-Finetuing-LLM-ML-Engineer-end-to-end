@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fashion Model — TF Serving</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F5F0E8;
+      --ink: #1A1208;
+      --gold: #C9A84C;
+      --rust: #B84B2F;
+      --muted: #8A7F6E;
+      --surface: #EDE8DC;
+    }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+    }
+
+    header h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    header p {
+      margin-top: 12px;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: var(--gold);
+      margin: 20px auto 0;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid #D8D0C0;
+      border-radius: 2px;
+      padding: 40px;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #D8D0C0;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+      transition: background 0.4s;
+    }
+    .status-dot.ok { background: #5BAD6F; box-shadow: 0 0 8px #5BAD6F88; }
+    .status-dot.error { background: var(--rust); }
+
+    .status-text {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--cream);
+      border: 1px solid #D8D0C0;
+      border-radius: 2px;
+      padding: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--ink);
+      resize: vertical;
+      min-height: 220px;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.6;
+    }
+
+    textarea:focus { border-color: var(--gold); }
+
+    .hint {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    button {
+      margin-top: 24px;
+      width: 100%;
+      padding: 16px;
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      border-radius: 2px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover { background: #2E2416; }
+    button:active { transform: scale(0.995); }
+    button:disabled { background: var(--muted); cursor: not-allowed; }
+
+    .result-box {
+      background: var(--ink);
+      color: #E8D9B0;
+      border-radius: 2px;
+      padding: 24px;
+      font-size: 0.75rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 80px;
+      position: relative;
+    }
+
+    .result-box .label-tag {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .output-cell {
+      background: #2A2010;
+      border: 1px solid #3A3020;
+      border-radius: 2px;
+      padding: 16px;
+    }
+
+    .output-cell .out-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .output-cell .out-value {
+      font-size: 1.1rem;
+      color: #F5F0E8;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+    }
+
+    .error-msg {
+      color: #E87060;
+      font-size: 0.72rem;
+      margin-top: 12px;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #C9A84C44;
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      margin-top: 40px;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      text-transform: uppercase;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Fashion <em>Inference</em></h1>
+  <p>TensorFlow Serving · REST API · localhost:8501</p>
+  <div class="divider"></div>
+</header>
+
+<!-- Status Card -->
+<div class="card">
+  <div class="card-title">Model Status</div>
+  <div class="status-row">
+    <div class="status-dot" id="statusDot"></div>
+    <span class="status-text" id="statusText">Checking model...</span>
+  </div>
+  <button onclick="checkStatus()" style="margin-top:0; padding: 10px; font-size:0.65rem;">↻ Refresh Status</button>
+</div>
+
+<!-- Inference Card -->
+<div class="card">
+  <div class="card-title">Run Inference</div>
+
+  <label>Input Data — shape (1, 30, 4)</label>
+  <textarea id="inputData" spellcheck="false"></textarea>
+  <p class="hint">→ 1 sample · 30 timesteps · 4 features per timestep</p>
+
+  <button id="predictBtn" onclick="runPredict()">Run Prediction</button>
+</div>
+
+<!-- Output Card -->
+<div class="card" id="outputCard" style="display:none;">
+  <div class="card-title">Prediction Output</div>
+  <div class="result-box" id="rawOutput">
+    <span class="label-tag">Raw Response</span>
+    <span id="rawText"></span>
+  </div>
+  <div class="output-grid" id="outputGrid"></div>
+</div>
+
+<footer>fashion_model · version 1 · tf serving 2.x</footer>
+
+<script>
+  const BASE = 'http://localhost:8501';
+  const MODEL = 'fashion_model';
+
+  // Generate dummy input: 1 x 30 x 4
+  function defaultInput() {
+    const seq = Array.from({length: 30}, () =>
+      [+(Math.random()).toFixed(3), +(Math.random()).toFixed(3),
+       +(Math.random()).toFixed(3), +(Math.random()).toFixed(3)]
+    );
+    return JSON.stringify({ signature_name: "serving_default", inputs: { input_1: [seq] } }, null, 2);
+  }
+
+  document.getElementById('inputData').value = defaultInput();
+
+  async function checkStatus() {
+    const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
+    dot.className = 'status-dot';
+    txt.textContent = 'Checking...';
+    try {
+      const res = await fetch(`${BASE}/v1/models/${MODEL}`);
+      const data = await res.json();
+      const state = data?.model_version_status?.[0]?.state;
+      if (state === 'AVAILABLE') {
+        dot.className = 'status-dot ok';
+        txt.textContent = `AVAILABLE — version ${data.model_version_status[0].version}`;
+      } else {
+        dot.className = 'status-dot error';
+        txt.textContent = `State: ${state || 'UNKNOWN'}`;
+      }
+    } catch(e) {
+      dot.className = 'status-dot error';
+      txt.textContent = 'Cannot reach localhost:8501 — is Docker running?';
+    }
+  }
+
+  async function runPredict() {
+    const btn = document.getElementById('predictBtn');
+    const outputCard = document.getElementById('outputCard');
+    const rawText = document.getElementById('rawText');
+    const grid = document.getElementById('outputGrid');
+
+    let payload;
+    try {
+      payload = JSON.parse(document.getElementById('inputData').value);
+    } catch(e) {
+      alert('Invalid JSON in input field.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader"></span>Predicting...';
+    outputCard.style.display = 'none';
+
+    try {
+      const res = await fetch(`${BASE}/v1/models/${MODEL}:predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      rawText.textContent = JSON.stringify(data, null, 2);
+      outputCard.style.display = 'block';
+
+      // Parse outputs
+      grid.innerHTML = '';
+      if (data.outputs) {
+        Object.entries(data.outputs).forEach(([key, val]) => {
+          const v = Array.isArray(val) ? val.flat()[0] : val;
+          grid.innerHTML += `
+            <div class="output-cell">
+              <div class="out-label">${key}</div>
+              <div class="out-value">${typeof v === 'number' ? v.toFixed(6) : JSON.stringify(v)}</div>
+            </div>`;
+        });
+      }
+    } catch(e) {
+      outputCard.style.display = 'block';
+      rawText.textContent = `Error: ${e.message}\n\nMake sure Docker is running and CORS is not blocked.`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Run Prediction';
+    }
+  }
+
+  checkStatus();
+</script>
+</body>
+</html>
