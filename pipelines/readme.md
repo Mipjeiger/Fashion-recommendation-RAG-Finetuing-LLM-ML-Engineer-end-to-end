@@ -22,3 +22,9 @@
     - Predicting sales and profit_status to ensure LSTM model is relevant for prediction
     - Build chatbot based on PDF document source for inspecting ecommerce business problem
     - Deploy LSTM model as prediction features and FinetuningLLM as chatbot on frontend for adding features
+
+- Deploy LSTM .keras model using Tensorflow Serving
+
+    ![alt text](../images/15ACCF7F-90AD-47F7-9567-A573A95B1C66.png)
+
+- Deploy Finetuning LLM + RAG in HuggingFace and integrating backend API Wrapped by langchain & langserve based on integrating with RAG_Analysis_Report.pdf Docs
