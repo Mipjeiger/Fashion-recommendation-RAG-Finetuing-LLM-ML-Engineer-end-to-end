@@ -31,5 +31,8 @@
     ![alt text](../images/6AA6AC43-D446-456D-85F3-8C3818E4961A.png)
     ![alt text](../images/054B7F7C-BD47-4F51-AB89-73B6E7F219BC.png)
 
-
 - Deploy Finetuning LLM + RAG in HuggingFace and integrating backend API Wrapped by langchain & langserve based on integrating with RAG_Analysis_Report.pdf Docs
+    - Deploy Finetuning integrating backend API Inference with langserve
+    ![alt text](828082FE-8616-46D5-AC01-7D6F48A78849.png)
+    - Finetuning LLM RAG invoke
+    ![alt text](../images/B58F3570-130E-4519-818F-89FA7736D8B3.png)

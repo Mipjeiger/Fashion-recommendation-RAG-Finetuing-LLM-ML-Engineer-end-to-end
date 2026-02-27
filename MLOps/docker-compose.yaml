@@ -94,17 +94,34 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      MALLOC_ARENA_MAX: 2
+      PYTHONUNBUFFERED: 1
+      PYTHONGC: 1
     command: >
       mlflow server
-      --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}
-      --default-artifact-root s3://mlflow-bucket/
-      --host 0.0.0.0
-      --port 5000
+        --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}
+        --default-artifact-root s3://mlflow-bucket/
+        --host 0.0.0.0
+        --port 5000
+        --workers 1
+        --gunicorn-opts "--timeout 120 --max-requests 200 --max-requests-jitter 20"
     ports:
       - "5020:5000"
-    restart: always
-    mem_limit: 384m
-    cpus: 0.5
+    restart: unless-stopped  # ✅ safer than always (won't restart on manual stop)
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 384M       # Hard cap - container killed if exceeded
+        reservations:
+          cpus: "0.25"
+          memory: 256M       # Guaranteed minimum
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     networks:
       - airflow-network
 
