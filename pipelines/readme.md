@@ -36,3 +36,10 @@
     ![alt text](../images/828082FE-8616-46D5-AC01-7D6F48A78849.png)
     - Finetuning LLM RAG invoke
     ![alt text](../images/B58F3570-130E-4519-818F-89FA7736D8B3.png)
+
+- Deploy Finetuned LLM in vLLM based on structure engineering
+    - Hugging Face (model storage)
+    - Qdrant (vector store)
+    - LangServe (RAG API wrapper)
+
+- 
