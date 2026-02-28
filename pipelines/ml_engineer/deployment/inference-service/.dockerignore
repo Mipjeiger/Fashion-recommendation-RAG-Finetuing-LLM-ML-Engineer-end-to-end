@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+venv/
+.env/
+
+# Notebooks
+*.ipynb
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+
+# Model artifacts (IMPORTANT — don't send model into inference image)
+model_store/
+../model_store/
+
+# Docker files
+docker-compose.yml
+
+# Build cache
+.cache/
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
