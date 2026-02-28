@@ -36,7 +36,7 @@ def seed_database():
         return
 
     creds = extract_credentials(database_url)
-    limit = 200000 # Limit to 200k items for testing
+    limit = 250000 # Limit to 250k items for testing
     
     print(f"Connecting to database {creds['dbname']} at {creds['host']}...")
     try:
