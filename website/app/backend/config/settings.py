@@ -47,7 +47,7 @@ class Settings(BaseSettings):
         env="MODEL_BASE_PATH"
     )
     INFERENCE_SERVICE_URL: str = Field(
-        default="http://localhost:8001/inference",
+        default="http://localhost:8002/inference",
         env="INFERENCE_SERVICE_URL"
     )
     MODEL_RELOAD_INTERVAL: int = Field(default=300, env="MODEL_RELOAD_INTERVAL")  # 5 minutes
