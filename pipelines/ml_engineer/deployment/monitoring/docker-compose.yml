@@ -24,8 +24,9 @@ services:
       --model_name=fashion_model
       --model_base_path=/models/fashion_model
       --rest_api_port=8501
+      --rest_api_address=0.0.0.0
     healthcheck:
-      test: ["CMD-SHELL", "(printf > /dev/tcp/127.0.0.1/8501) >/dev/null 2>&1 || exit 1"]
+      test: ["CMD", "/usr/bin/printf", "GET /v1/models/fashion_model HTTP/1.1\nHost: localhost\n\n", ">", "/dev/tcp/127.0.0.1/8501"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -39,7 +40,7 @@ services:
       - ml_network
     ports:
       - "8015:8015"
-      - "8001:8001"
+      - "8013:8013"
     depends_on:
       tensorflow-serving:
         condition: service_healthy
