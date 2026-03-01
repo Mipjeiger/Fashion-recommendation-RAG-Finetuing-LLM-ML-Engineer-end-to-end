@@ -12,30 +12,32 @@ SQL_FILE = os.path.join(BASE_DIR, "MLOps", "database", "fashion_system.sql")
 # Load environment variables
 load_dotenv(ENV_PATH)
 
-def extract_credentials(database_url):
-    """Parses standard URI-style database configurations."""
-    # format: postgresql+psycopg2://user:pass@host:port/dbname
-    url = database_url.split("://")[1]
-    user_pass, host_port_db = url.split("@")
-    user, password = user_pass.split(":")
-    
-    host_port, dbname = host_port_db.split("/")
-    host, port = host_port.split(":")
+# --------- Database Seeding Script for Fashion Images --------
+
+def get_connection_db():
+    # Config postgresql connection
+    DB_USER = os.getenv("DB_USER")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT")
+    DB_NAME = os.getenv("DB_NAME")
+    if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME]):
+        raise ValueError("Database credentials are not fully set in the environment variables.")
     return {
-        "dbname": dbname,
-        "user": user,
-        "password": password,
-        "host": host,
-        "port": port
+        "user": DB_USER,
+        "password": DB_PASSWORD,
+        "host": DB_HOST,
+        "port": DB_PORT,
+        "dbname": DB_NAME
     }
 
 def seed_database():
+    creds = get_connection_db()
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         print("Error: DATABASE_URL not found in website/.env")
         return
-
-    creds = extract_credentials(database_url)
+    
     limit = 250000 # Limit to 250k items for testing
     
     print(f"Connecting to database {creds['dbname']} at {creds['host']}...")
