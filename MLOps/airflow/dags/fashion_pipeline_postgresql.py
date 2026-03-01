@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # MLOps/airflow/dags
 PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR)) # MLOps/
 
 # Path to the source data
-INPUT_PATH = os.path.join(PROJECT_ROOT, "data", "raw", "matched_fashion_dataset.parquet")
+INPUT_PATH = os.path.join(PROJECT_ROOT, "data", "raw", "matched_fashion_dataset_300k.parquet")
 
 
 # ----------------------------------------------------
