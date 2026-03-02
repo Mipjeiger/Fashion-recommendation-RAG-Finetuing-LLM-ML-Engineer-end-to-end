@@ -7,21 +7,50 @@ import pyarrow.parquet as pq
 from datetime import datetime
 from airflow import DAG
 from airflow.sdk import task
+from pathlib import Path
+from dotenv import load_dotenv
 
 """"Database connection for PostgreSQL - Airflow DAG.
 This DAG is a demonstration of how to connect to a PostgreSQL database from an Airflow",
 and storing the pipeline run status in a table."""
 
+# ==========================================================
 # CONFIGURATION
+# ==========================================================
+
+# File location:
+# MLOps/airflow/dags/fashion_pipeline_postgresql.py
+
+DAG_FILE = Path(__file__).resolve()
+DAGS_DIR = DAG_FILE.parent # MLOps/airflow/dags
+PROJECT_ROOT = DAGS_DIR.parent.parent # MLOps/
+ENV_PATH = PROJECT_ROOT / "pipelines" / ".env" # Load environment variables
+load_dotenv(dotenv_path=ENV_PATH)
+
+# PostgreSQL connection URI (from .env)
 POSTGRES_URI = os.getenv("POSTGRES_URI")
 
-# Create BASE_DIR and CURATED_PATH
-BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # MLOps/airflow/dags
-PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR)) # MLOps/
+# ==========================================================
+# DATA PATHS
+# ==========================================================
 
-# Path to the source data
-INPUT_PATH = os.path.join(PROJECT_ROOT, "data", "raw", "matched_fashion_dataset_300k.parquet")
+# Actual dataset location:
+# MLOps/database/data/raw/matched_fashion_dataset_300k_rows.parquet
 
+INPUT_PATH = (
+    PROJECT_ROOT
+    / "database"
+    / "data"
+    / "raw"
+    / "matched_fashion_dataset_300k_rows.parquet"
+)
+
+# Convert to string only if needed
+INPUT_PATH = str(INPUT_PATH)
+
+# Safety check (very recommended)
+if not Path(INPUT_PATH).exists():
+    raise FileNotFoundError(f"Dataset not found at: {INPUT_PATH}")
 
 # ----------------------------------------------------
 # DAG DEFINITION

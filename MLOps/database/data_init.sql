@@ -55,6 +55,9 @@ CREATE TABLE IF NOT EXISTS fashion (
 -- Validate the table creation
 SELECT * FROM fashion;
 
+-- select count from fashion
+SELECT COUNT(*) FROM fashion;
+
 CREATE TABLE IF NOT EXISTS market_sentiment (
     item_id TEXT PRIMARY KEY,
     view_count INT NOT NULL,
@@ -75,10 +78,13 @@ CREATE TABLE IF NOT EXISTS churn_prediction (
 -- Validate the table creation
 SELECT * FROM churn_prediction;
 
+
+DROP TABLE IF EXISTS loss_profit;
 -- Create loss & profit table
 CREATE TABLE IF NOT EXISTS loss_profit (
     item_id TEXT PRIMARY KEY,
     purchase_count INT NOT NULL,
+    view_count INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     stocks INT NOT NULL
 );

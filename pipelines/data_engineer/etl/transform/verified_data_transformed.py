@@ -4,7 +4,7 @@ from pathlib import Path
 
 # Database path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-db_path = BASE_DIR / 'database' / 'loss_profit.db'
+db_path = BASE_DIR / 'database' / 'loss_profit_renew.db'
 
 # Load data base .db and check tables
 engine = create_engine(f'sqlite:///{db_path}')
