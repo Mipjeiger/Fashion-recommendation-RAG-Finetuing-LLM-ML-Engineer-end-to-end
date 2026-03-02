@@ -27,6 +27,7 @@ def load_data():
     dtype_map = {
         'item_id': types.Text(),
         'purchase_count': types.Integer(),
+        'view_count': types.Integer(),
         'price': types.Numeric(10, 2),
         'stocks': types.Integer(),
     }
@@ -34,8 +35,11 @@ def load_data():
     try:
         df = extract_income()
 
+        # Chunk retrieval data in every 10000 rows to avoid memory issues
+        chunk_size = 10000
+
         # Select only column names that match the dtype_map keys
-        df_load = df[['item_id', 'purchase_count', 'price', 'stocks']].head(100000)
+        df_load = df[['item_id', 'purchase_count', 'view_count', 'price', 'stocks']]
 
         print(f"Extracted rows: {len(df_load)}")
         print(df_load.head())  # Print first 5 rows for verification
@@ -44,8 +48,8 @@ def load_data():
         engine = create_engine(connection_string)
 
         with engine.connect() as connection:
-            df_load.to_sql('loss_profit', con=connection, if_exists='append', index=False, dtype=dtype_map)
-            connection.commit()
+            # Define chunk size for loading data and integrated with df_load
+            df_load.to_sql('loss_profit', con=connection, if_exists='replace', index=False, dtype=dtype_map, chunksize=chunk_size)
             print(f"Successfully loaded {len(df_load)} records into loss_profit table")
 
             # Verify the load by querying the table
