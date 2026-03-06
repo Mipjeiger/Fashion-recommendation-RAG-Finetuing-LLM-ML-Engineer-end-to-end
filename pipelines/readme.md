@@ -41,3 +41,12 @@
     - Deploy in AIKit LLMs
 
 - 
+
+## 🤖 Breakdown project on Finetuning LLM → Chatbot integration in UI
+
+- 🎯 Purpose project 
+
+- Add Dataframe (df) features to ensure the LLM prompting is relevant to dataframe
+- Integration PDF report to dataframe for as reliable chatbot
+- Match recommendation system toward the images for where the product will be shown in UI as ranking recommendation
+- Merge LSTM model for sales and profit_status prediction (Optional)
