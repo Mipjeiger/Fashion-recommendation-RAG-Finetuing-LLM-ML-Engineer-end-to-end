@@ -37,9 +37,7 @@
     - Finetuning LLM RAG invoke
     ![alt text](../images/B58F3570-130E-4519-818F-89FA7736D8B3.png)
 
-- Deploy Finetuned LLM in vLLM based on structure engineering
-    - Hugging Face (model storage)
-    - Qdrant (vector store)
-    - LangServe (RAG API wrapper)
+- Deploy Finetuned LLM in to get started host, deployment, and buld
+    - Deploy in AIKit LLMs
 
 - 
