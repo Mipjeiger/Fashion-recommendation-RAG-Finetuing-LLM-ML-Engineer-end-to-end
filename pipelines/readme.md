@@ -50,3 +50,4 @@
 - Integration PDF report to dataframe for as reliable chatbot
 - Match recommendation system toward the images for where the product will be shown in UI as ranking recommendation
 - Merge LSTM model for sales and profit_status prediction (Optional)
+- Build chatbot experiment integration
