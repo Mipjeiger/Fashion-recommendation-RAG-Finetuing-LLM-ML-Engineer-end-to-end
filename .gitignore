@@ -18,3 +18,4 @@ MLOps/models/tensorflow_training/fashion_recommendation_model.onnx
 **.DS_Store
 pipelines/.env
 venv
+pipelines/ai_engineer/LLM/Fashion_Recommendation_Engineer/
