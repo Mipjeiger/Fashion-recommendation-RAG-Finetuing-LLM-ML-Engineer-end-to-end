@@ -1,0 +1,13 @@
+langchain
+langchain-community
+langchain-huggingface
+langchain-qdrant
+qdrant-client
+sentence-transformers
+huggingface_hub
+gradio
+pandas
+pyarrow
+pillow
+pypdf
+tabulate

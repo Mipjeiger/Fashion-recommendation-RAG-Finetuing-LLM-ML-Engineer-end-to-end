@@ -19,3 +19,4 @@ MLOps/models/tensorflow_training/fashion_recommendation_model.onnx
 pipelines/.env
 venv
 pipelines/ai_engineer/LLM/Fashion_Recommendation_Engineer/
+pipelines/ai_engineer/LLM/.gradio/certificate.pem

@@ -50,4 +50,24 @@
 - Integration PDF report to dataframe for as reliable chatbot
 - Match recommendation system toward the images for where the product will be shown in UI as ranking recommendation
 - Merge LSTM model for sales and profit_status prediction (Optional)
-- Build chatbot experiment integration
+- - AI Engineering structure project concept
+    - Experiment in Notebook → Stabilize → Move to Python services → Expose API
+- Similarity images search toward to Image_path as ranking recommendation by ‘subcategory’
+- Build RAG Chain + Show Recommendations product
+    - Models using → HuggingFace Qwen
+    ![alt text](ai_engineer/images/CF6767D5-0331-444F-8BB5-4F834778BC14_4_5005_c.jpeg)
+    - CPU locals memory preventing → Qdrant Cloud
+    ![alt text](ai_engineer/images/86676F1B-F661-467C-BAEF-9CE4E2C6A6EA.png)
+    - Fashion recommendation Question to get Answer → featured docs matched
+    ![alt text](ai_engineer/images/C8470918-A692-4D11-BC62-DEACF72E5389_1_105_c.jpeg)
+    ![alt text](ai_engineer/images/CBBE4AB9-FB46-44F0-A417-C9C43D228D7F_1_105_c.jpeg)
+    ![alt text](ai_engineer/images/D77319EB-E625-4BD0-9796-7B862037B66B.png)
+    ![alt text](ai_engineer/images/F73CFE60-6316-41E8-8690-251E134D5D03_1_105_c.jpeg)
+    ![alt text](ai_engineer/images/A331F5D4-8D44-4AA7-BBEF-D418AD89547B_1_105_c.jpeg)
+    - Build Chatbot UI in Gradio
+    ![alt text](ai_engineer/images/8CBA55D4-C6AD-4BAE-9FBF-77EDCB6A80DE.png)
+    ![alt text](ai_engineer/images/E2CAA9B8-255A-4E68-9EEA-E327A6A06FC3.png)
+    ![alt text](ai_engineer/images/3D4CDBA7-4872-4057-998C-88FED0B55F14.png)
+    ![alt text](ai_engineer/images/82EC3E66-A755-4C65-A5D6-650BBD7AB62B.png)
+    ![alt text](ai_engineer/images/459BE8A8-2A61-4ADA-AA81-A9D36DDBC206.png)
+    ![alt text](ai_engineer/images/BBD4ECB8-D4F6-4AAF-AEFD-2E5012B08C4E.png)
