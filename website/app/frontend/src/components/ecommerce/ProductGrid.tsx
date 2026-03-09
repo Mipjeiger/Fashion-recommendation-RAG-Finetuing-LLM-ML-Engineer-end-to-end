@@ -78,11 +78,11 @@ export default function ProductGrid({ loading: initialLoading, onProductClick }:
                 }}
               />
               {hoveredId === product.id && (
-                <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center space-x-4 transition-opacity">
-                  <button className="p-3 bg-white rounded-full hover:bg-gray-100 transition-colors">
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center space-x-4 transition-opacity">
+                  <button className={`p-3 rounded-full transition-colors ${theme === 'dark' ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-900 hover:bg-gray-100'}`}>
                     <ShoppingCart className="w-5 h-5" />
                   </button>
-                  <button className="p-3 bg-white rounded-full hover:bg-gray-100 transition-colors">
+                  <button className={`p-3 rounded-full transition-colors ${theme === 'dark' ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-900 hover:bg-gray-100'}`}>
                     <Heart className="w-5 h-5" />
                   </button>
                 </div>
