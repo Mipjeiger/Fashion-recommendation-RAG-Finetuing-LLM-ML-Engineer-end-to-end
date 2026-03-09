@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     # API
     API_V1_PREFIX: str = "/api/v1"
     HOST: str = Field(default="0.0.0.0", env="HOST")
-    PORT: int = Field(default=8000, env="PORT")
+    PORT: int = Field(default=8030, env="PORT")
     
     # Database (required - must come from environment)
     DATABASE_URL: str = Field(
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
         env="MODEL_BASE_PATH"
     )
     INFERENCE_SERVICE_URL: str = Field(
-        default="http://localhost:8002/inference",
+        default="http://localhost:8002/inference", #
         env="INFERENCE_SERVICE_URL"
     )
     MODEL_RELOAD_INTERVAL: int = Field(default=300, env="MODEL_RELOAD_INTERVAL")  # 5 minutes
