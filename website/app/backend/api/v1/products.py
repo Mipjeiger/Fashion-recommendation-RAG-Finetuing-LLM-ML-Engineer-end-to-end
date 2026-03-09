@@ -31,7 +31,7 @@ async def get_products(db=Depends(get_db)):
             "id": str(item_id),
             "name": f"{row_dict.get('brand', 'IndoCloth')} {row_dict.get('category', 'Fashion Item')}".strip(),
             "price": float(row_dict.get("price", 0.0) if row_dict.get("price") is not None else 0.0),
-            "image": f"http://localhost:8000/images/{image_path}" if image_path else "/api/placeholder/300/400"
+            "image": f"/images/{image_path}" if image_path else "/api/placeholder/300/400"
         }
             
         products.append(product)
