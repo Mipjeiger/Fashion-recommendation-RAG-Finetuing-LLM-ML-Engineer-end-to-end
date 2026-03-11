@@ -1,3 +1,4 @@
+-- Active: 1771162575354@@localhost@5432@airflow
 -- SQL Schema for fashion images integration
 DROP TABLE IF EXISTS fashion_system;
 

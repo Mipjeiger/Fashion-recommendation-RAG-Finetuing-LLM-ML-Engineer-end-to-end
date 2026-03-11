@@ -5,6 +5,9 @@ import psycopg2
 import pandas as pd
 from dotenv import load_dotenv
 
+"""Script to seed the fashion_system table with 300k items from a parquet file. 
+(Retrieves data from matched_fashion_dataset_300k_rows.parquet and inserts into PostgreSQL database)"""
+
 # Path mapping for configuration and data
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 ENV_PATH = os.path.join(BASE_DIR, "website", ".env")
