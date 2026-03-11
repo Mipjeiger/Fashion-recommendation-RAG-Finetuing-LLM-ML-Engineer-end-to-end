@@ -2,9 +2,9 @@
 import os
 import pandas as pd
 from pathlib import Path
-from MLOps.notifications.slack_API.cart_notify import notify_cart_from_row
+from MLOps.backend.notifications.slack_API.cart_notify import notify_cart_from_row
 
-DATABASE = Path(os.getenv("DATABASE_PATH", "/app/database/data/raw/matched_fashion_dataset.parquet"))
+DATABASE = Path(os.getenv("DATABASE_PATH", "/app/database/data/raw/matched_fashion_dataset_300k_rows.parquet"))
 
 def add_to_cart(item_id: str):
     """

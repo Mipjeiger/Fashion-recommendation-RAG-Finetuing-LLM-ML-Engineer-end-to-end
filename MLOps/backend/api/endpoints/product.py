@@ -2,9 +2,9 @@
 import os
 import pandas as pd
 from pathlib import Path
-from MLOps.notifications.slack_API.product_notify import notify_click_from_row
+from MLOps.backend.notifications.slack_API.product_notify import notify_click_from_row
 
-DATABASE = Path(os.getenv("DATABASE_PATH", "/app/database/data/raw/matched_fashion_dataset.parquet"))
+DATABASE = Path(os.getenv("DATABASE_PATH", "/app/database/data/raw/matched_fashion_dataset_300k_rows.parquet"))
 
 def click_product(item_id: str):
     """
