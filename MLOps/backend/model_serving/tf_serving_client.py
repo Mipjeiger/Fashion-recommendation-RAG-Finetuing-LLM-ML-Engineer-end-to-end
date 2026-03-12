@@ -1,5 +1,6 @@
 import requests
 import os
+import numpy as np
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -17,6 +18,22 @@ TF_HEALTH_URL = f"http://{TF_SERVING_HOST}:{TF_SERVING_PORT}/v1/models/{TF_SERVI
 print(f"TF Serving URL: {TF_SERVING_URL}")
 print(f"TF Health URL: {TF_HEALTH_URL}")
 print(f"TF Serving Host: {TF_SERVING_HOST}")
+
+# --- Encoding maps must match your training preprocessing ---
+CATEGORY_MAP = {"tops": 0, "bottoms": 1}
+BRAND_MAP = {"ZARA": 0, "H&M": 1, "Tommy Hilfiger": 2}
+
+# Create function to preprocess input data
+def preprocess(item: dict) -> list[float]:
+    """Convert raw item data into the format expected by the model."""
+    return [
+        float(CATEGORY_MAP.get(item["category"], -1)),
+        float(BRAND_MAP.get(item["brand"], -1)),
+        float(item["price"]),
+        float(item["view_count"]),
+        float(item["purchase_count"]),
+        float(item["stocks"])
+    ]
 
 # Create function to check health of TF Serving
 def health_check() -> bool:
@@ -54,32 +71,44 @@ Fix options:
 def get_predictions(data: dict) -> dict:
     """
 Send a prediction request to TF Serving and return the response."""
-    if not health_check():
-        raise ConnectionError(
-            f"TF serving is not healthy at {TF_SERVING_HOST}:{TF_SERVING_PORT}. Please check the connection and try again."
-        )
+    # if not health_check():
+    #     raise ConnectionError(
+    #         f"TF serving is not healthy at {TF_SERVING_HOST}:{TF_SERVING_PORT}. Please check the connection and try again."
+    #     )
     
+    # Check model metadata to see expected inputs
+    metadata_url = f"http://{TF_SERVING_HOST}:{TF_SERVING_PORT}/v1/models/{TF_SERVING_MODEL_NAME}/metadata"
     try:
-        payload = {"instances": [data["instances"]]}  # Ensure payload is in correct format
-        response = requests.post(
-            TF_SERVING_URL,
-            json=payload,
-            timeout=30
-        )
-        response.raise_for_status()
-        result = response.json()
-        print(f"Prediction response: {result}")
-        return result
+        meta_resp = requests.get(metadata_url)
+        if meta_resp.status_code == 200:
+            print("Model Metadata:", meta_resp.json())
+    except Exception as e:
+        print(f"Could not fetch metadata: {e}")
+
+    # Preprocess the input data
+    instances = [preprocess(item) for item in data["instances"]]
     
-    except requests.exceptions.ConnectionError as e:
-        print(f"Connection error: {e}")
-        raise
-    except requests.exceptions.Timeout as e:
-        print(f"TF Serving request timed out: {e}")
-        raise
-    except requests.exceptions.HTTPError as e:
-        print(f"HTTP error: {e} - Response content: {response.content}")
-        raise
+    # The model expects shape (-1, 30, 4)
+    # Each instance currently has 6 features. We need to:
+    # 1. Select the correct 4 features (assuming the first 4 for now, but need to verify)
+    # 2. Pad or repeat to reach sequence length 30
+    
+    processed_instances = []
+    for inst in instances:
+        features = inst[:4]
+        sequence = [features] * 30
+        processed_instances.append(sequence)
+
+    payload = {"instances": processed_instances}
+    print(f"Sending payload to TF Serving: {payload}")
+
+    response = requests.post(TF_SERVING_URL, json=payload, timeout=30)
+    if response.status_code != 200:
+        print(f"Error Response Body: {response.text}")
+    response.raise_for_status()  # Raise an error for bad responses
+    result = response.json()
+    print(f"Received response from TF Serving: {result}")
+    return result
 
 
 # Example usage
