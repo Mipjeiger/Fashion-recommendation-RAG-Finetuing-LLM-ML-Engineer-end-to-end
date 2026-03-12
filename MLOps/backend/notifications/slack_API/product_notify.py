@@ -1,10 +1,10 @@
-from notifications.slack_service import slack
+from notifications.slack_service.slack import send_slack_message
 import pandas as pd
 
-def notify_click_from_row(row: pd.Series):
+def notify_product_view(row: pd.Series):
     """
     Notify pull values from a DataFrame row to Slack."""
-    slack.notify_product_click(
+    send_slack_message(
         item_id=row['item_id'],
         category=row['category'],
         subcategory=row['subcategory'],

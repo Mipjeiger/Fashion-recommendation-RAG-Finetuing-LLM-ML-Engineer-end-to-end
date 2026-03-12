@@ -1,18 +1,19 @@
-# API/endpoints/cart.py
-import os
-import pandas as pd
-from pathlib import Path
-from MLOps.backend.notifications.slack_API.cart_notify import notify_cart_from_row
+from fastapi import APIRouter
+from streaming.kafka_producer.producer import send_event
+from notifications.slack_API.cart_notify import notify_cart
 
-DATABASE = Path(os.getenv("DATABASE_PATH", "/app/database/data/raw/matched_fashion_dataset_300k_rows.parquet"))
+router = APIRouter()
 
-def add_to_cart(item_id: str):
+# Creaete cart event endpoint
+@router.post("/add")
+def add_to_cart(data: dict):
     """
-    Simulate adding an item to the cart and notify via Slack."""
-    df = pd.read_parquet(DATABASE)
-    row = df.loc[df["item_id"] == item_id]
+    Simulate adding a product to cart and trigger effects."""
 
-    if row.empty:
-        raise ValueError(f"Item ID {item_id} not found in dataset.")
-    
-    notify_cart_from_row(row.iloc[0])
+    send_event({
+        "event": "add_to_cart",
+        "item_id": data.get("item_id"),
+    })
+    notify_cart(data.get("item_id"))
+    return {"status": "success",
+            "message": f"Product {data.get('item_id')} added to cart and event sent."}

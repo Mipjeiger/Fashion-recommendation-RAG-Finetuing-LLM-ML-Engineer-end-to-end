@@ -1,16 +1,11 @@
 import sys
 from pathlib import Path
-from fastapi import FastAPI
-from pydantic import BaseModel
 
 # Add MLOps/streaming to Python path so kafka_producer can be imported
-sys.path.append(str(Path(__file__).parents[1] / "streaming"))
+sys.path.append(str(Path(__file__).parent))
 
-# Import works correctly after adding to path
-from notifications.slack_service import slack
-from kafka_producer.producer import send_event
+from fastapi import FastAPI
+from api.main import api_router
 
-app = FastAPI(
-    title='Fashion Recommendation System API',
-    description='FastAPI backend + kafka + slack Notifications for fashion recommendation system + Tensorflow serving client',
-)
+app = FastAPI(title="Fashion Recommendation API")
+app.include_router(api_router)

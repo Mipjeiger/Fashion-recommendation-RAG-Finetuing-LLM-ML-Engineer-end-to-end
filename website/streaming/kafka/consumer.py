@@ -11,7 +11,7 @@ load_dotenv(dotenv_path=env_path)
 
 def get_consumer():
     return KafkaConsumer(
-        "realtime-recommendation",
+        "fashion-events",
         bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVERS"),
         auto_offset_reset="latest",
         enable_auto_commit=True,

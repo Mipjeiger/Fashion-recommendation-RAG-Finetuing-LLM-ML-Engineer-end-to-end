@@ -1,5 +1,5 @@
 """
-IndoCloth Market - Main FastAPI application.
+IndoCloth Market - Main FastAPI application // Integrated Website Backend.
 """
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
