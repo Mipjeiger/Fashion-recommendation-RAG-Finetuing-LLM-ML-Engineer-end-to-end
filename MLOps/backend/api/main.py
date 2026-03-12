@@ -1,8 +1,10 @@
-"""Create a FastAPI backend (calls serving, retrieval, DB)"""
+"""Create router API endpoints for product-related operations."""
 import logging
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
+from api.endpoints.product import router as product_router
+from api.endpoints.cart import router as cart_router
 
 # ========================
 # Configure logging
@@ -16,10 +18,8 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-# Ensure the .env is exist
-if not os.path.exists(os.path.join(BASE_DIR, '..', '.env')):
-    raise FileNotFoundError("The .env is not exist")
-else:
-    logger.info(".env file loaded successfully")
+# Create router and include endpoints
+router = APIRouter()
 
-    
+router.include_router(product_router, prefix="/product")
+router.include_router(cart_router, prefix="/cart")

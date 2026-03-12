@@ -1,10 +1,10 @@
-from notifications.slack_service import slack
+from notifications.slack_service.slack import send_slack_message
 import pandas as pd
 
-def notify_cart_from_row(row: pd.Series):
+def notify_cart(row: pd.Series):
     """
     Notify about pull values from dataset row to Slack channel."""
-    slack.notify_add_to_cart(
+    send_slack_message(
         item_id = row["item_id"],
         category= row["category"],
         subcategory= row["subcategory"],

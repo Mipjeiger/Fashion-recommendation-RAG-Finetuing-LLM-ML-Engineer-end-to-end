@@ -1,44 +1,29 @@
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parents[2]))        # → MLOps/backend/streaming
+sys.path.append(str(Path(__file__).parents[3]))        # → MLOps/backend
+
+
 from kafka import KafkaConsumer
 import json
-import psycopg2
 import os
-from sqlalchemy import create_engine
+from streaming.streamer.stream_processor import process_event
 from dotenv import load_dotenv
 
 # Load environment variables
-env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
-load_dotenv(env_path)
-
-# Retrieve database connection parameters
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_NAME = os.getenv("DB_NAME")
+ENV_PATH = Path(__file__).parents[4] / '.env'
+load_dotenv(ENV_PATH)
 
 consumer = KafkaConsumer(
-    "fashion-events",
-    bootstrap_servers='localhost:9092',
-    value_deserializer=lambda v: json.loads(v.decode('utf-8'))
+    os.getenv("KAFKA_TOPIC"),
+    bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVER"),
+    value_deserializer=lambda v: json.loads(v.decode('utf-8')),
+    auto_offset_reset='earliest'
 )
 
-conn = psycopg2.connect(
-    host=DB_HOST,
-    port=DB_PORT,
-    user=DB_USER,
-    password=DB_PASSWORD,
-    database=DB_NAME
-)
 
 # Iterate consumer to read messages
 for msg in consumer:
     print("Received event:", msg.value)
     event = msg.value
-    with conn.cursor() as cur:
-        cur.execute("""
-            UPDATE fashion_system
-            SET view_count = view_count + 1
-            WHERE item_id = %s
-            """, (event["item_id"],))
-        conn.commit()
-        print(f"Rows affected:", cur.rowcount)
+    process_event(event) # Process the event (e.g., send Slack notification, call TF Serving, etc.)

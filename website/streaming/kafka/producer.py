@@ -8,7 +8,7 @@ producer = KafkaProducer(
 
 def publish_recommendation(event: dict):
     producer.send(
-        topic="realtime-recommendations",
+        topic="fashion-events",
         value=event
     )
     producer.flush()

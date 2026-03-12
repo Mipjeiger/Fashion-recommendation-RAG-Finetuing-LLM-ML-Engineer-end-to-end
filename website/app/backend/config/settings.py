@@ -52,6 +52,11 @@ class Settings(BaseSettings):
     )
     MODEL_RELOAD_INTERVAL: int = Field(default=300, env="MODEL_RELOAD_INTERVAL")  # 5 minutes
     
+    # Integrate Backend MLOps API -> Website Backend API
+    ML_SERVICE_URL: str = Field(
+        default="http://localhost:8001"
+    )
+
     # Slack
     SLACK_BOT_TOKEN: Optional[str] = Field(default=None, env="SLACK_BOT_TOKEN")
     SLACK_WEBHOOK_URL: Optional[str] = Field(default=None, env="SLACK_WEBHOOK_URL")
