@@ -125,50 +125,6 @@ services:
     networks:
       - airflow-network
 
-  # ===============================
-  # Fashion Model Serving (No Dockerfile)
-  # ===============================
-  # docker-compose.yml
-  fashion-serving:
-    image: python:3.11-slim
-    container_name: fashion-serving
-    working_dir: /app
-
-    volumes:
-      - ../MLOps/serving:/app
-      - ../MLOps/models:/app/models
-
-    command: >
-      sh -c "
-      apt-get update &&
-      apt-get install -y --no-install-recommends curl build-essential &&
-      pip install --no-cache-dir -r /app/requirements.txt &&
-      python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-      "
-
-    environment:
-      MODEL_PATH: /app/models/tensorflow_training/fashion_recommendation_model.keras
-      PYTHONDONTWRITEBYTECODE: 1
-      PYTHONUNBUFFERED: 1
-      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
-
-    ports:
-      - "8000:8000" 
-      - "8001:8001" 
-
-    restart: always
-    mem_limit: 512m
-    cpus: 0.75
-
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 20s
-      timeout: 10s
-      retries: 3
-
-    networks:
-      - airflow-network
-
 volumes:
   postgres-data:
   minio-data:
