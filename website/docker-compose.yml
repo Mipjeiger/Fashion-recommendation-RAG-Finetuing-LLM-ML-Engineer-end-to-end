@@ -6,46 +6,15 @@ services:
     image: postgres:15-alpine
     container_name: indocloth-postgres
     environment:
-      POSTGRES_DB: indocloth
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5433:5432" # 5433 as host port : 5432 as container port
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - indocloth-network
-
-  # Kafka
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: indocloth-zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - indocloth-network
-
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: indocloth-kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-    healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h localhost -p ${DB_PORT}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -57,16 +26,16 @@ services:
     build:
       context: ./app/backend
       dockerfile: Dockerfile
-    container_name: indocloth-backend
+    container_name: indocloth-backend-API
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/indocloth
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      INFERENCE_SERVICE_URL: http://inference-service:8001/inference
+      DATABASE_URL: postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}
+      KAFKA_BOOTSTRAP_SERVERS: host.docker.internal:9092
+      INFERENCE_SERVICE_URL: http://inference-service:8000/inference
       MODEL_BASE_PATH: /app/models
       DEBUG: "false"
       ENVIRONMENT: production
-      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN:-}
-      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
     ports:
       - "8030:8030"
     volumes:
@@ -94,7 +63,7 @@ services:
     environment:
       MODEL_PATH: /app/models
     ports:
-      - "8001:8001"
+      - "8000:8000"
     volumes:
       - ../MLOps/models:/app/models:ro
     networks:

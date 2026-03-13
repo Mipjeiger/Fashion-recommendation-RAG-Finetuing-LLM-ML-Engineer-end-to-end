@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     
     # Integrate Backend MLOps API -> Website Backend API
     ML_SERVICE_URL: str = Field(
-        default="http://localhost:8001"
+        default="http://localhost:8000"
     )
 
     # Slack
