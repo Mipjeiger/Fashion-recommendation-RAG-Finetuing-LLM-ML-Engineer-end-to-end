@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: indocloth-postgres
@@ -10,66 +9,60 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5433:5432" # 5433 as host port : 5432 as container port
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h localhost -p ${DB_PORT}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - indocloth-network
 
-  # Backend API
   backend:
     build:
       context: ./app/backend
       dockerfile: Dockerfile
     container_name: indocloth-backend-API
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}
+      DATABASE_URL: ${DATABASE_URL}
       KAFKA_BOOTSTRAP_SERVERS: host.docker.internal:9092
-      INFERENCE_SERVICE_URL: http://inference-service:8000/inference
+      INFERENCE_SERVICE_URL: http://inference-service:8002/inference
+      ML_SERVICE_URL: http://inference-service:8000
       MODEL_BASE_PATH: /app/models
       DEBUG: "false"
+      SECRET_KEY: ${SECRET_KEY}
       ENVIRONMENT: production
+      LOG_LEVEL: INFO
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+      STATIC_IMAGES_DIR: /app/fashion_images/dataset_clean
     ports:
       - "8030:8030"
-    volumes:
-      - ../MLOps/models:/app/models:ro
     depends_on:
-      postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8030/health', timeout=5)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - postgres
+    volumes:
+      - ../fashion_images/dataset_clean:/app/fashion_images/dataset_clean:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - indocloth-network
+    restart: unless-stopped
 
-  # FastAPI Inference Service (existing)
   inference-service:
     build:
-      context: ../api/fastapi_app
-      dockerfile: ../../docker/fastapi.Dockerfile
+      context: ./api/fastapi_app        # ✅ Fix: website/api/fastapi_app
+      dockerfile: ../../docker/fastapi.Dockerfile  # ✅ Fix: relative to context
     container_name: indocloth-inference
     environment:
       MODEL_PATH: /app/models
+      OMP_NUM_THREADS: "1"
     ports:
       - "8000:8000"
     volumes:
       - ../MLOps/models:/app/models:ro
     networks:
       - indocloth-network
+    restart: unless-stopped
 
-  # Frontend
   frontend:
     build:
       context: ./app/frontend
@@ -83,6 +76,7 @@ services:
       VITE_API_URL: http://localhost:8030/api/v1
     networks:
       - indocloth-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
