@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install deps into isolated venv and copy required files
-RUN python -m .venv /opt/.venv
+RUN python -m venv /opt/.venv
 ENV PATH="/opt/.venv/bin:$PATH"
 
 COPY requirements.txt .

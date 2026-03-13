@@ -1,0 +1,51 @@
+# VCS
+.git
+.gitignore
+.github/
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*.so
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.coverage
+**/htmlcov/
+**/.venv/
+**/venv/
+**/env/
+
+# Node / Frontend
+**/node_modules/
+**/.next/
+**/dist/
+**/build/
+**/.cache/
+**/.vite/
+
+# Logs / temp
+**/*.log
+**/tmp/
+**/.DS_Store
+
+# Secrets / env
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+
+# IDE
+**/.vscode/
+**/.idea/
+
+# Data / notebooks
+**/notebooks/
+**/*.ipynb
+**/data/
+**/artifacts/
+**/checkpoints/
+
+# Docker files not needed in context
+Dockerfile*
+docker-compose*.yml
