@@ -1,9 +1,15 @@
 global:
-  scrape_interval: 5s
+  scrape_interval: 10s
+  evaluation_interval: 10s
 
 # Grafana → connect to Prometheus at http://prometheus:9090
 
 scrape_configs:
-  - job_name: "serving"
+  - job_name: "fastapi"
     static_configs:
-      - targets: ["serving:8081"]
+      - targets: ["fastapi:8030"]
+    metrics_path: /metrics # Expose metrics at /metrics endpoint
+
+  - job_name: "prometheus-self"
+    static_configs:
+      - targets: ["localhost:9090"]

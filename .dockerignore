@@ -1,0 +1,62 @@
+# ─── VCS ──────────────────────────────────────────────────────
+.git
+.gitignore
+.github/
+
+# ─── Python ───────────────────────────────────────────────────
+**/__pycache__/
+**/*.py[cod]
+**/*.so
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.coverage
+**/htmlcov/
+**/.venv/
+**/venv/
+**/env/
+
+# ─── Node / Frontend ──────────────────────────────────────────
+**/node_modules/
+**/.next/
+**/dist/
+**/build/
+**/.cache/
+**/.vite/
+
+# ─── Logs / Temp ──────────────────────────────────────────────
+**/*.log
+**/tmp/
+**/.DS_Store
+**/*.tmp
+
+# ─── Secrets / Env ────────────────────────────────────────────
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+
+# ─── IDE ──────────────────────────────────────────────────────
+**/.vscode/
+**/.idea/
+
+# ─── Data / Notebooks ─────────────────────────────────────────
+**/notebooks/
+**/*.ipynb
+**/data/
+**/artifacts/
+**/checkpoints/
+
+# ─── Docker ───────────────────────────────────────────────────
+**/docker-compose*.yml
+**/*.Dockerfile
+**/Dockerfile*
+
+# ─── ML / Models (baked in image = bad) ──────────────────────
+**/model_store/
+**/MLOps/models/
+**/fashion_images/
+
+# ─── Monitoring configs (mounted as volumes) ──────────────────
+**/prometheus.yml
+**/grafana/
