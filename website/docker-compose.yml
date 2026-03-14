@@ -1,20 +1,4 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: indocloth-postgres
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - indocloth-network
-
   backend:
     build:
       context: ./app/backend
@@ -23,7 +7,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL}  # must point to external DB now
       KAFKA_BOOTSTRAP_SERVERS: host.docker.internal:9092
       INFERENCE_SERVICE_URL: http://inference-service:8002/inference
       ML_SERVICE_URL: http://inference-service:8000
@@ -37,8 +21,6 @@ services:
       STATIC_IMAGES_DIR: /app/fashion_images/dataset_clean
     ports:
       - "8030:8030"
-    depends_on:
-      - postgres
     volumes:
       - ../fashion_images/dataset_clean:/app/fashion_images/dataset_clean:ro
     extra_hosts:
@@ -49,8 +31,8 @@ services:
 
   inference-service:
     build:
-      context: ./api/fastapi_app        # ✅ Fix: website/api/fastapi_app
-      dockerfile: ../../docker/fastapi.Dockerfile  # ✅ Fix: relative to context
+      context: ./api/fastapi_app
+      dockerfile: ../../docker/fastapi.Dockerfile
     container_name: indocloth-inference
     environment:
       MODEL_PATH: /app/models
@@ -77,9 +59,6 @@ services:
     networks:
       - indocloth-network
     restart: unless-stopped
-
-volumes:
-  postgres_data:
 
 networks:
   indocloth-network:

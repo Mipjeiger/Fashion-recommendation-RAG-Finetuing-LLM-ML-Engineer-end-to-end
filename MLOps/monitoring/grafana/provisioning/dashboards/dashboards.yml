@@ -1,0 +1,8 @@
+apiVersion: 1
+providers:
+  - name: Indocloth
+    type: file
+    disableDeletion: False
+    updateIntervalSeconds: 25
+    options:
+      path: /var/lib/grafana/dashboards

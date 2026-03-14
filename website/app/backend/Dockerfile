@@ -1,49 +1,66 @@
-# Multi-stage build for IndoCloth Market Backend
-FROM python:3.11-slim as builder
+# ─── Stage 1: Builder ─────────────────────────────────────────
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Reduce pip/python cache + bytecode
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PYTHODONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1          
 
-# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ \
+    gcc \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Install deps into isolated venv and copy required files
+# ✅ Isolated .venv
 RUN python -m venv /opt/.venv
 ENV PATH="/opt/.venv/bin:$PATH"
 
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel \
-    && pip install -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt \
+    # ✅ Strip test/cache/dist-info to reduce .venv size
+    && find /opt/.venv -type d -name "__pycache__"  -exec rm -rf {} + 2>/dev/null || true \
+    && find /opt/.venv -type d -name "tests"        -exec rm -rf {} + 2>/dev/null || true \
+    && find /opt/.venv -type d -name "*.dist-info"  -exec rm -rf {} + 2>/dev/null || true \
+    && find /opt/.venv -type f -name "*.pyc"        -delete 2>/dev/null || true
 
-# Production stage
-FROM python:3.11-slim
+# ─── Stage 2: Runtime ─────────────────────────────────────────
+FROM python:3.11-slim AS runtime
 
 WORKDIR /app
 
-# Make sure scripts in .local are usable
 ENV PATH="/opt/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app
+    PYTHONPATH=/app \
+    # ✅ Prevent BLAS/numpy thread explosion
+    OMP_NUM_THREADS=1 \
+    OPENBLAS_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1 \
+    NUMEXPR_NUM_THREADS=1
 
-# Copy Python dependencies from builder
+# ✅ Runtime only — no gcc/g++ in final image
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# ✅ Copy only .venv from builder — no compiler tools
 COPY --from=builder /opt/.venv /opt/.venv
 
-# Copy application code
+# ✅ Copy only app source
 COPY . .
 
-# Expose port
 EXPOSE 8030
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import httpx; httpx.get('http://localhost:8030/health', timeout=5)"
+    CMD curl -f http://localhost:8030/health || exit 1
 
-# Run application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8030"]
+# ✅ workers=1 prevents RAM explosion — scale via docker compose instead
+CMD ["uvicorn", "main:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8030", \
+     "--workers", "1", \
+     "--loop", "uvloop", \
+     "--limit-concurrency", "100", \
+     "--backlog", "128"]
