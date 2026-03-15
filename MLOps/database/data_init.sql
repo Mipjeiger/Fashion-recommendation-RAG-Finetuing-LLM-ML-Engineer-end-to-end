@@ -1,4 +1,4 @@
--- Active: 1771296061150@@127.0.0.1@5432@airflow
+-- Active: 1771162575354@@localhost@5432@airflow
 -- Active: 1770487880142@@127.0.0.1@5432.0.0.1@5432.0.0.1@5432.0.0.1@5432.0.0.1@5432
 
 -- AIRFLOW + SPARK ENVIRONMENT
@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS pipeline_runs (
 SELECT * FROM pipeline_runs;
 
 -- Fashion recommendation business metrics -  POSTGRESQL ENVIRONMENT
+
+DROP TABLE IF EXISTS fashion;
 
 -- Create Fashion table
 CREATE TABLE IF NOT EXISTS fashion (
@@ -78,7 +80,6 @@ CREATE TABLE IF NOT EXISTS churn_prediction (
 -- Validate the table creation
 SELECT * FROM churn_prediction;
 
-
 DROP TABLE IF EXISTS loss_profit;
 -- Create loss & profit table
 CREATE TABLE IF NOT EXISTS loss_profit (
@@ -101,3 +102,5 @@ CREATE TABLE IF NOT EXISTS cost (
 );
 -- validate the table creation
 SELECT * FROM cost;
+
+SELECT * FROM loss_profit;

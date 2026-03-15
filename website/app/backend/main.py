@@ -137,6 +137,25 @@ async def root():
         "status": "running"
     }
 
+# endpoint post for retrieve data -> information -> recommendation result -> response
+@app.post("/recommendations_product")
+async def get_recom_product(request: dict):
+    """Endpoint to post user data and get fashion recommendations."""
+    # Log the incoming request
+    logger.info(f"Received recommendation request: {request}")
+
+    # Validate input data (this is a placeholder)
+    if "user_id" or "item_id" not in request:
+        logger.warning("Invalid request data: missing user_id or item_id")
+        return {"error": "Invalid request data"}
+    
+    # Process the request and get recommendations (this is a placeholder)
+    recommendations = ["item1", "item2", "item3"]  # Replace with actual recommendation logic
+    logger.info(f"Generated recommendations for user {request.get('user_id')}: {recommendations}")
+    return {"user_id": request.get("user_id"), "recommendations": recommendations}
+
+# Predidct sales
+
 
 if __name__ == "__main__":
     uvicorn.run(
