@@ -1,42 +1,71 @@
-version: "3.9"
-
 services:
+  postgres:
+    image: postgres:13-alpine
+    container_name: indocloth-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - indocloth-network
+    restart: unless-stopped
+
   fastapi:
     build:
       context: ./website/app/backend
       dockerfile: Dockerfile
-    container_name: indocloth-fastapi
+    container_name: indocloth-FastAPI
     ports:
       - "8030:8030"
     env_file:
       - .env
-    environment: # Environment runs outside docker container, use host.docker.internal instead
-      # Postgresql
-      DATABASE_URL: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@host.docker.internal:5432/${DB_NAME}
-      # Kafka
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: "false"
+      ENVIRONMENT: production
+      LOG_LEVEL: INFO
+      ML_SERVICE_URL: http://inference-service:8000
+      INFERENCE_SERVICE_URL: http://inference-service:8000
       KAFKA_BOOTSTRAP_SERVERS: host.docker.internal:9092
-      # MLflow
-      MLFLOW_TRACKING_URI: http://host.docker.internal:5020
-      # Inference service
-      INFERENCE_SERVICE_URL: http://host.docker.internal:8000/inference
-      ML_SERVICE_URL: http://host.docker.internal:8000
-      # MinIO
-      MINIO_ENDPOINT: minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-    depends_on:
-      minio:
-        condition: service_healthy
-    restart: unless-stopped
+      MODEL_BASE_PATH: /app/models
+      STATIC_IMAGES_DIR: /app/fashion_images/dataset_clean
+    volumes:
+      - ./fashion_images/dataset_clean:/app/fashion_images/dataset_clean:ro
     extra_hosts:
-      - "host.docker.internal:host-gateway" # Linux compatibility
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8030/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - indocloth-network
+    restart: unless-stopped
+
+  inference-service:
+    build:
+      context: ./website/api/fastapi_app
+      dockerfile: ../../docker/fastapi.Dockerfile
+    container_name: indocloth-inference-service
+    environment:
+      MODEL_PATH: /app/models
+      OMP_NUM_THREADS: "1"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./MLOps/models:/app/models:ro
+    networks:
+      - indocloth-network
+    restart: unless-stopped
 
   minio:
     image: minio/minio:latest
@@ -73,7 +102,7 @@ services:
       - "--web.enable-lifecycle"
     restart: unless-stopped
     extra_hosts:
-      - "host.docker.internal:host-gateway" # Linux compatibility
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9090/-/ready"]
       interval: 15s
@@ -88,8 +117,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/indocloth.json
     volumes:
@@ -100,11 +129,13 @@ services:
       - prometheus
     networks:
       - indocloth-network
+    restart: unless-stopped
 
 volumes:
   minio_data:
   prometheus_data:
   grafana_data:
+  postgres_data:
 
 networks:
   indocloth-network:
