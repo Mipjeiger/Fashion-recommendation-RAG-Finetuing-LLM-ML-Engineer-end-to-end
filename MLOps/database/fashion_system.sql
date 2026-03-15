@@ -1,4 +1,4 @@
--- Active: 1771162575354@@localhost@5432@airflow
+-- Active: 1771162575354@@localhost@5432
 -- SQL Schema for fashion images integration
 DROP TABLE IF EXISTS fashion_system;
 
@@ -22,7 +22,7 @@ SELECT * FROM fashion_system WHERE item_id = 'TNC_000001';
 -- Create ENUM type first
 CREATE TYPE profit_status_enum AS ENUM ('profit', 'loss');
 
-
+-- Create fashion_recommendation table with ENUM type
 DROP TABLE IF EXISTS fashion_recommendation;
 CREATE TABLE IF NOT EXISTS fashion_recommendation (
     id SERIAL PRIMARY KEY,
