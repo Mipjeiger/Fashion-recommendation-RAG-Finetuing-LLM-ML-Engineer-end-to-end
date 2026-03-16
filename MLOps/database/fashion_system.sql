@@ -1,4 +1,4 @@
--- Active: 1771162575354@@localhost@5432
+-- Active: 1771296061150@@127.0.0.1@5432@airflow
 -- SQL Schema for fashion images integration
 DROP TABLE IF EXISTS fashion_system;
 
@@ -24,6 +24,7 @@ CREATE TYPE profit_status_enum AS ENUM ('profit', 'loss');
 
 -- Create fashion_recommendation table with ENUM type
 DROP TABLE IF EXISTS fashion_recommendation;
+
 CREATE TABLE IF NOT EXISTS fashion_recommendation (
     id SERIAL PRIMARY KEY,
     item_id TEXT UNIQUE NOT NULL,
@@ -38,8 +39,10 @@ CREATE TABLE IF NOT EXISTS fashion_recommendation (
 );
 
 -- Create indexes for better query performance
-CREATE INDEX idx_fashion_recommendation_item_id ON fashion_recommendation(item_id);
-CREATE INDEX idx_fashion_recommendation_profit_status ON fashion_recommendation(profit_status);
-CREATE INDEX idx_fashion_recommendation_image_path ON fashion_recommendation(image_path);
+CREATE INDEX idx_fashion_recommendation_item_id ON fashion_recommendation (item_id);
+
+CREATE INDEX idx_fashion_recommendation_profit_status ON fashion_recommendation (profit_status);
+
+CREATE INDEX idx_fashion_recommendation_image_path ON fashion_recommendation (image_path);
 
 SELECT * FROM fashion_recommendation;

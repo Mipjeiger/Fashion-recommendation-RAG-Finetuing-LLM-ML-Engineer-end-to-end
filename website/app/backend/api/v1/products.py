@@ -14,7 +14,7 @@ async def get_products(db=Depends(get_db)):
     Get a list of fashion products.
     """
     from sqlalchemy import text
-    query = text("SELECT * FROM fashion_system LIMIT 24;")
+    query = text("SELECT * FROM fashion_recommendation LIMIT 100;")
     
     # We execute a raw SQL query
     result = await db.execute(query)

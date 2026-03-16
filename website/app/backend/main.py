@@ -21,7 +21,6 @@ from services.model_loader import model_loader
 setup_logging()
 logger = get_logger("main")
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
