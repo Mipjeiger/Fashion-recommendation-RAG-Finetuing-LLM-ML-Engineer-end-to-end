@@ -88,13 +88,16 @@ def serve_stable_random_image(category_dirs: list, image_name: str, static_base:
     """Returns a deterministic random image from valid category subdirectories."""
     if not Path(static_base).exists():
         return {"error": "Image directory not found"}
+    
+    if not category_dirs:
+        return {"error": "No category directories available"}
 
     h_dir = int(hashlib.md5((image_name + "_dir").encode()).hexdigest(), 16)
     chosen_dir = category_dirs[h_dir % len(category_dirs)]
 
     full_dir = os.path.join(static_base, chosen_dir)
     if os.path.exists(full_dir):
-        images = [f for f in os.listdir(full_dir) if f.endswith(('.jpg', '.png', '.jpeg'))]
+        images = sorted([f for f in os.listdir(full_dir) if f.endswith(('.jpg', '.png', '.jpeg'))])
         if images:
             h_img = int(hashlib.md5(image_name.encode()).hexdigest(), 16)
             selected_image = images[h_img % len(images)]
@@ -103,16 +106,19 @@ def serve_stable_random_image(category_dirs: list, image_name: str, static_base:
     return {"error": "Image not found"}
 
 
+TOPS_DIRS = ["casual_shirts", "formal_shirts", "printed_hoodies", "printed_tshirts", "solid_tshirts"]
+BOTTOMS_DIRS = ["formal_pants", "jeans", "men_cargos"]
+
 @app.get("/images/tops/{image_name}", tags=["images"])
 async def get_tops_image(image_name: str):
-    category_dirs = [d for d in os.listdir(STATIC_IMAGES_DIR) if os.path.isdir(os.path.join(STATIC_IMAGES_DIR, d)) and 'top' in d.lower()]
-    return serve_stable_random_image(category_dirs, image_name, STATIC_IMAGES_DIR)
+    """Serve a deterministic image from 'tops' category directories."""
+    return serve_stable_random_image(TOPS_DIRS, image_name, STATIC_IMAGES_DIR)
 
 
 @app.get("/images/bottoms/{image_name}", tags=["images"])
 async def get_bottoms_image(image_name: str):
-    category_dirs = [d for d in os.listdir(STATIC_IMAGES_DIR) if os.path.isdir(os.path.join(STATIC_IMAGES_DIR, d)) and 'bottom' in d.lower()]
-    return serve_stable_random_image(category_dirs, image_name, STATIC_IMAGES_DIR)
+    """Serve a deterministic image from 'bottoms' category directories."""
+    return serve_stable_random_image(BOTTOMS_DIRS, image_name, STATIC_IMAGES_DIR)
 
 
 # Mount static files

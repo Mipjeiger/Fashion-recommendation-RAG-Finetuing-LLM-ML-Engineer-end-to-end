@@ -20,3 +20,5 @@ pipelines/.env
 venv
 pipelines/ai_engineer/LLM/Fashion_Recommendation_Engineer/
 pipelines/ai_engineer/LLM/.gradio/certificate.pem
+**mlruns
+**mlartifacts
