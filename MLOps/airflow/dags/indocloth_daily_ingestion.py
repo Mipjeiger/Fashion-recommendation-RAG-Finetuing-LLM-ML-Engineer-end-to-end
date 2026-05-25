@@ -21,6 +21,7 @@ default_args = {
     "retry_delay": timedelta(minutes=5),
 }
 
+# Dag definition
 with DAG(
     dag_id="indocloth_daily_ingestion",
     default_args=default_args,
